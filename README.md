@@ -1,50 +1,20 @@
-# Cipher Build Blazer — Phase 2
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-Live build phase for **Cipher (CSE Association)'s** track of the Build Blazer event at SJEC.
+# Run and deploy your AI Studio app
 
-This repo is the starting point for Phase 2, where third-year teams fork it and build the winning design into a live, deployed website.
+This contains everything you need to run your app locally.
 
-## How this works
+View your app in AI Studio: https://ai.studio/apps/11eb2932-fa14-4219-9e1a-fdd8f2685958
 
-1. **Fork** this repository into your own GitHub account.
-2. Clone your fork locally.
-3. Implement the winning Figma design assigned to your team.
-4. Commit early and often — the process matters as much as the result.
-5. Deploy your build (Vercel, Netlify, GitHub Pages, or similar).
-6. Submit your fork link + live deployment link before the deadline.
+## Run Locally
 
-## Getting started
+**Prerequisites:**  Node.js
 
-```bash
-git clone https://github.com/<your-username>/cipher-buildblazer-p2.git
-cd cipher-buildblazer-p2
-# install dependencies here once the stack is decided
-```
 
-## Team
-
-| Role | Name |
-|------|------|
-| Team Lead | TBD |
-| Members | TBD |
-
-## Design reference
-
-Link the Phase 1 Figma file here once assigned.
-
-## Tech stack
-
-To be filled in by each team (e.g. React, Tailwind, Next.js).
-
-## Deployment
-
-Live link: _add once deployed_
-
-## Rules
-
-- Fork, don't clone-and-push directly to this repo.
-- Stick to the assigned Figma design as closely as possible.
-- Submit via pull request or the link-submission form (whichever the organizers specify).
-
----
-Organized by **Cipher (CSE Association)**, SJEC, in collaboration with **AgentBlazer Club**.
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`

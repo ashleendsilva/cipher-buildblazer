@@ -1,0 +1,237 @@
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { X, Send, CheckCircle2, Copy, Check, Terminal } from 'lucide-react';
+import confetti from 'canvas-confetti';
+import { playCyberClick, playAccessGranted } from '../utils/audio';
+
+interface JoinModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const JoinModal: React.FC<JoinModalProps> = ({ isOpen, onClose }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [year, setYear] = useState('2nd Year');
+  const [domain, setDomain] = useState('Technical Skill Building');
+  const [message, setMessage] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [applicantId, setApplicantId] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !email.trim()) return;
+
+    playAccessGranted();
+    const id = `CPHR-${Math.floor(1000 + Math.random() * 9000)}-${year.slice(0, 1)}Y`;
+    setApplicantId(id);
+    setIsSubmitted(true);
+
+    try {
+      confetti({
+        particleCount: 70,
+        spread: 60,
+        origin: { y: 0.6 },
+        colors: ['#22c55e', '#10b981', '#4ade80', '#059669'],
+      });
+    } catch {
+      // Ignore
+    }
+  };
+
+  const handleCopyId = () => {
+    playCyberClick();
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText(applicantId)
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+        .catch(() => {
+          // Clipboard access blocked in sandboxed iframe
+        });
+    }
+  };
+
+  const handleReset = () => {
+    setName('');
+    setEmail('');
+    setMessage('');
+    setIsSubmitted(false);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md font-mono">
+      <motion.div
+        initial={{ scale: 0.94, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.94, opacity: 0 }}
+        className="relative max-w-lg w-full bg-[#060e09] border border-emerald-500/80 rounded-2xl p-6 sm:p-8 shadow-[0_0_40px_rgba(34,197,94,0.25)] text-emerald-100"
+      >
+        {/* Close button */}
+        <button
+          onClick={() => {
+            playCyberClick();
+            onClose();
+          }}
+          className="absolute top-4 right-4 p-1.5 text-emerald-500 hover:text-white rounded border border-emerald-900 hover:border-emerald-500 transition-all"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        {!isSubmitted ? (
+          <div>
+            {/* Header (matching video at 00:51) */}
+            <div className="text-xs font-mono tracking-widest text-emerald-500 uppercase flex items-center gap-2">
+              <span className="text-emerald-400 font-bold">//</span>
+              <span>ACCESS REQUEST</span>
+            </div>
+
+            <h3 className="text-2xl sm:text-3xl font-black text-white mt-1">
+              Join CIPHER
+            </h3>
+
+            <p className="mt-1 text-xs sm:text-sm text-emerald-400/80 font-sans">
+              Send us a message and we&apos;ll get back to you.
+            </p>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              <div>
+                <label className="block text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-1">
+                  NAME
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your name"
+                  className="w-full px-4 py-2.5 bg-[#08150c] border border-emerald-900/80 focus:border-emerald-400 rounded-lg text-sm text-white placeholder-emerald-800 focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-1">
+                  EMAIL
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="w-full px-4 py-2.5 bg-[#08150c] border border-emerald-900/80 focus:border-emerald-400 rounded-lg text-sm text-white placeholder-emerald-800 focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-1">
+                    YEAR OF STUDY
+                  </label>
+                  <select
+                    value={year}
+                    onChange={(e) => setYear(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-[#08150c] border border-emerald-900/80 focus:border-emerald-400 rounded-lg text-xs text-white focus:outline-none"
+                  >
+                    <option value="1st Year">1st Year (Freshers)</option>
+                    <option value="2nd Year">2nd Year (Sophomore)</option>
+                    <option value="3rd Year">3rd Year (Junior)</option>
+                    <option value="4th Year">4th Year (Senior)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-1">
+                    PRIMARY DOMAIN
+                  </label>
+                  <select
+                    value={domain}
+                    onChange={(e) => setDomain(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-[#08150c] border border-emerald-900/80 focus:border-emerald-400 rounded-lg text-xs text-white focus:outline-none"
+                  >
+                    <option value="Technical Skill Building">Technical Skill Building</option>
+                    <option value="Leadership & Governance">Leadership & Governance</option>
+                    <option value="Events & Collaboration">Events & Collaboration</option>
+                    <option value="Industry Readiness">Industry Readiness</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-emerald-400 uppercase tracking-wider mb-1">
+                  MESSAGE
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Tell us why you'd like to join..."
+                  className="w-full px-4 py-2.5 bg-[#08150c] border border-emerald-900/80 focus:border-emerald-400 rounded-lg text-sm text-white placeholder-emerald-800 focus:outline-none resize-none transition-colors"
+                />
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="w-full py-3 px-6 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-sm tracking-wider uppercase rounded-lg transition-all shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:shadow-[0_0_30px_rgba(34,197,94,0.7)] flex items-center justify-center gap-2"
+                >
+                  <span>SEND</span>
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : (
+          <div className="text-center py-4 space-y-4">
+            <div className="w-14 h-14 rounded-full bg-emerald-950 border-2 border-emerald-400 flex items-center justify-center text-emerald-400 mx-auto shadow-[0_0_20px_rgba(34,197,94,0.5)]">
+              <CheckCircle2 className="w-8 h-8" />
+            </div>
+
+            <h3 className="text-2xl font-black text-white">
+              ACCESS TRANSMITTED
+            </h3>
+
+            <p className="text-sm text-emerald-300 font-sans max-w-sm mx-auto">
+              Your application has been authenticated and forwarded to the CIPHER executive committee.
+            </p>
+
+            {/* Generated pass ticket */}
+            <div className="p-4 bg-[#08150c] border border-emerald-700/80 rounded-lg text-left space-y-2">
+              <div className="flex items-center justify-between text-xs text-emerald-500">
+                <span>APPLICANT TOKEN:</span>
+                <button
+                  onClick={handleCopyId}
+                  className="flex items-center gap-1 text-[11px] text-emerald-400 hover:text-white"
+                >
+                  {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copied ? 'COPIED' : 'COPY'}</span>
+                </button>
+              </div>
+              <div className="text-lg font-bold text-emerald-300 tracking-wider">
+                {applicantId}
+              </div>
+              <div className="text-[11px] text-emerald-600 font-mono">
+                {name} • {year} • {domain}
+              </div>
+            </div>
+
+            <button
+              onClick={handleReset}
+              className="mt-4 px-6 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs uppercase tracking-wider rounded-lg transition-colors"
+            >
+              DONE
+            </button>
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+};

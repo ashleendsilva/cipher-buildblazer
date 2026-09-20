@@ -1,0 +1,494 @@
+import { Leader, DomainItem, EventItem, ArchiveItem } from '../types';
+
+export const CIPHER_META = {
+  name: 'CIPHER',
+  fullName: 'Student Association of Computer Science & Engineering',
+  institution: 'St Joseph Engineering College (SJEC)',
+  node: 'NODE_SJEC_CSE_01',
+  term: '2025 — 2026',
+  tagline: 'Bridging academic knowledge and practical application — a community of aspiring professionals in computing.',
+  about: 'CIPHER is the student association of the Department of Computer Science & Engineering. It serves as a platform for students to nurture their technical and interpersonal skills through innovative and collaborative activities. The association strives to bridge the gap between academic knowledge and practical application, fostering a community of aspiring professionals dedicated to excellence in computing.',
+};
+
+export const DOMAINS: DomainItem[] = [
+  {
+    id: 'tech-skill',
+    code: '01',
+    title: 'Technical Skill Building',
+    sessionsCount: 5,
+    description: 'Hands-on workshops, coding sessions, and tech talks that turn theory into working software.',
+    icon: 'Code2',
+    tags: ['Full-Stack', 'AI Systems', 'System Design', 'Open Source'],
+    recentWorkshops: ['React & Node.js Deep Dive', 'Solidity & Web3 Protocols', 'RPA Automation']
+  },
+  {
+    id: 'leadership',
+    code: '02',
+    title: 'Leadership & Governance',
+    sessionsCount: 3,
+    description: 'Annual elections for President, Secretary, and office bearers - guided by the HOD and Faculty Coordinator.',
+    icon: 'Crown',
+    tags: ['Elections', 'Mentorship', 'Policy', 'Executive Board'],
+    recentWorkshops: ['Board Strategy Sync', 'Parliamentary Debate Protocol', 'Team Orchestration']
+  },
+  {
+    id: 'events-collab',
+    code: '03',
+    title: 'Events & Collaboration',
+    sessionsCount: 6,
+    description: 'Hackathons, seminars, and department-level competitions that bring students together.',
+    icon: 'Layers',
+    tags: ['Hackathons', 'Branch Gala', 'AgentBlazer', 'Prompt Ops'],
+    recentWorkshops: ['PROMPT OPS-2K26', 'HACKTO Future 20', 'Lumière Gala']
+  },
+  {
+    id: 'industry',
+    code: '04',
+    title: 'Industry Readiness',
+    sessionsCount: 4,
+    description: 'Bridging classroom learning with real-world application to prepare students for the field.',
+    icon: 'Rocket',
+    tags: ['Mock Interviews', 'KSCST Funding', 'Tech Talks', 'Career Prep'],
+    recentWorkshops: ['UDAAN Placement Series', 'KSCST Project Incubation', 'Industrial Visits']
+  }
+];
+
+export const LEADERS: Leader[] = [
+  {
+    id: 'elston-pereira',
+    name: 'Elston Herold Pereira',
+    role: 'PRESIDENT',
+    category: 'executive',
+    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=700&q=80',
+    bio: 'Leads the CIPHER executive committee, orchestrating technical initiatives, university collaborations, and departmental vision.',
+    quote: 'Computing is not just code—it is the architecture of modern possibility.',
+    contributions: ['Spearheaded HacktoFuture 20', 'Overhauled student mentorship workflow', 'Led Industry Outreach sprint'],
+    github: 'https://github.com',
+    linkedin: 'https://linkedin.com',
+    email: 'elston.pereira@sjec.ac.in'
+  },
+  {
+    id: 'raynell-lewis',
+    name: 'Raynell Lewis',
+    role: 'VICE PRESIDENT',
+    category: 'executive',
+    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=700&q=80',
+    bio: 'Oversees operational execution of departmental competitions, workshops, and inter-collegiate technical symposiums.',
+    quote: 'Empowering peers to step outside textbooks and ship tangible software.',
+    contributions: ['Coordinated PROMPT OPS-2K26', 'Curated Applied ML series', 'Initiated peer-to-peer code reviews'],
+    github: 'https://github.com',
+    linkedin: 'https://linkedin.com',
+    email: 'raynell.lewis@sjec.ac.in'
+  },
+  {
+    id: 'nazmin-ziya',
+    name: 'Nazmin Ziya',
+    role: 'TREASURER',
+    category: 'executive',
+    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=700&q=80',
+    bio: 'Manages CIPHER financial budget, sponsor relations, event grants, and fiscal governance across all flagship summits.',
+    quote: 'Resource allocation and financial clarity drive sustainable innovation.',
+    contributions: ['KSCST grant disbursements', 'Gala logistics budgeting', 'Sponsor procurement'],
+    github: 'https://github.com',
+    linkedin: 'https://linkedin.com',
+    email: 'nazmin.ziya@sjec.ac.in'
+  },
+  {
+    id: 'jeslin-ninora',
+    name: 'Jeslin Ninora',
+    role: 'JOINT TREASURER',
+    category: 'executive',
+    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=700&q=80',
+    bio: 'Assists in auditing workshop expenditures, participant registrations, prize endowments, and logistics tracking.',
+    quote: 'Precision in execution transforms good intentions into landmark events.',
+    contributions: ['Inventory management', 'Registration desks automated flow', 'Audit documentation'],
+    github: 'https://github.com',
+    linkedin: 'https://linkedin.com',
+    email: 'jeslin.ninora@sjec.ac.in'
+  },
+  {
+    id: 'chaitra-r',
+    name: 'Chaitra R',
+    role: 'SECRETARY',
+    category: 'executive',
+    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=700&q=80',
+    bio: 'Maintains official correspondence, meeting minutes, departmental notices, and liaison between students and faculty.',
+    quote: 'Clear documentation is the bedrock of transparent community leadership.',
+    contributions: ['Freshers Onboarding Guide', 'Executive board circulars', 'Academic calendar coordination'],
+    github: 'https://github.com',
+    linkedin: 'https://linkedin.com',
+    email: 'chaitra.r@sjec.ac.in'
+  },
+  {
+    id: 'dr-melwyn-dsouza',
+    name: "Dr. Melwyn D'Souza",
+    role: 'HEAD OF DEPARTMENT',
+    subtitle: 'HOD, Computer Science & Engineering',
+    category: 'faculty',
+    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=700&q=80',
+    bio: 'Guiding visionary for CIPHER, nurturing research ethics, industry partnerships, and state-of-the-art curriculum alignments.',
+    quote: 'Excellence in computing is achieved when academic discipline meets creative curiosity.',
+    contributions: ['Departmental Research Advisor', 'KSCST Project Endorsement', 'Industry MoU Lead'],
+    email: 'hodcse@sjec.ac.in'
+  },
+  {
+    id: 'ms-nisha-roche',
+    name: 'Ms. Nisha J Roche',
+    role: 'FACULTY COORDINATOR',
+    subtitle: 'Assistant Professor, Dept of CSE',
+    category: 'faculty',
+    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=700&q=80',
+    bio: 'Provides operational mentorship, program moderation, and guidance for technical hackathons and student governance.',
+    quote: 'Guiding the next generation of software pioneers to dream big and build responsibly.',
+    contributions: ['Faculty Mentor for AgentBlazer Club', 'PROMPT OPS-2K26 Oversight'],
+    email: 'nisha.roche@sjec.ac.in'
+  },
+  {
+    id: 'ms-jaishma-k',
+    name: 'Ms. Jaishma K',
+    role: 'FACULTY COORDINATOR',
+    subtitle: 'Assistant Professor, Dept of CSE',
+    category: 'faculty',
+    image: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=700&q=80',
+    bio: 'Mentors student project development, competitive programming initiatives, and technical symposium compliance.',
+    quote: 'Continuous learning through hands-on experimentation builds true engineering character.',
+    contributions: ['Coordinated Industry Visits', 'Technical Session Reviewer'],
+    email: 'jaishma.k@sjec.ac.in'
+  }
+];
+
+export const EVENTS: EventItem[] = [
+  {
+    id: 'lumiere-gala',
+    badge: 'BRANCH GALA',
+    dateStr: '29 OCT 2025',
+    isoDate: '2025-10-29',
+    venue: 'Kalam Auditorium',
+    title: 'Lumière — The Gala',
+    theme: 'Where Glam Meets Glow',
+    shortSummary: 'The CSE branch entry programme at Kalam Auditorium, themed "Where Glam Meets Glow." Organised by the Cipher Association with coordinated red, gold and black décor, it welcomed students into the department and reinforced a shared sense of collective identity.',
+    fullNarrative: [
+      'The Department of Computer Science and Engineering (CSE) held its branch entry programme, "Lumière – The Gala," on 29 October 2025 at the Kalam Auditorium. Organised by the Cipher Association, the event welcomed students into the department through a formal gathering centered on the theme "Where Glam Meets Glow."',
+      'The venue featured coordinated red, gold and black décor, floral arrangements, illuminated panels and a central Lumière backdrop, creating an atmospheric setting for the inaugural celebration.',
+      'The programme gave students an opportunity to interact with peers and take part in a shared departmental event beyond academics, highlighting the role of the Cipher Association in organising student-led activities. It represented a celebratory entry that marked the students’ transition into the department and reinforced a sense of collective identity.'
+    ],
+    highlights: [
+      'Theme: "Where Glam Meets Glow"',
+      'Coordinated Red, Gold & Black Décor',
+      'Kalam Auditorium Grand Assembly',
+      'Ceremonial Lamp Lighting & Induction',
+      'Cultural Performances & Faculty Felicitations'
+    ],
+    galleryImages: [
+      {
+        url: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80',
+        caption: 'Kalam Auditorium stage presentation and inaugural address',
+        tag: 'AUDITORIUM_INAUGURATION'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80',
+        caption: 'Lumière themed stage lighting and commemorative floral installations',
+        tag: 'STAGE_GLOW'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=1200&q=80',
+        caption: 'CIPHER student association executive committee induction ceremony',
+        tag: 'EXECUTIVE_INDUCTION'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80',
+        caption: 'Red & gold coordinated celebratory formal gathering with faculty mentors',
+        tag: 'FACULTY_GATHERING'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1200&q=80',
+        caption: 'Auditorium crowd of CSE freshers and senior department peers',
+        tag: 'STUDENT_COHORT'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1531058020387-3be344556be6?auto=format&fit=crop&w=1200&q=80',
+        caption: 'Cultural performances highlighting rhythm and engineering camaraderie',
+        tag: 'CULTURAL_PERFORMANCE'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80',
+        caption: 'Interactive branch welcome games and departmental icebreakers',
+        tag: 'COMMUNITY_ICEBREAKER'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=80',
+        caption: 'Grand finale group photograph with dignitaries, faculty & Cipher leaders',
+        tag: 'FINALE_GROUP'
+      }
+    ]
+  },
+  {
+    id: 'prompt-ops',
+    badge: 'COMPETITION',
+    dateStr: '25 MAR 2026',
+    isoDate: '2026-03-25',
+    venue: 'CSE Advanced Computing Labs',
+    title: 'PROMPT OPS-2K26',
+    theme: 'Prompt Engineering & Autonomous AI Challenge',
+    shortSummary: 'A technical competition on prompt engineering and AI tools by the AgentBlazer Club and Cipher. Track 1 (1st Year) covered invitation, logo and image recreation; Track 2 (2nd Year) tested JSON conversion, Python debugging and a Gemini AI security prompt challenge.',
+    fullNarrative: [
+      'Organized by the AgentBlazer Club and Cipher under the guidance of Ms. Nisha J Roche, Ms. Jaishma K, and HOD Dr. Melwyn D’Souza, this technical competition focused on prompt engineering and AI tools (mapped to PO4, PO5, PO8, PO11).',
+      'The competition was partitioned into two competitive tracks tailored to students’ technical maturity: Track 1 tested generative visual prompting and asset reconstruction, while Track 2 presented rigorous code correction, structured data transformation, and LLM security jailbreak defenses.',
+      'Students demonstrated deep fluency with modern multimodal tools, prompt chain conditioning, and algorithmic problem-solving in a fast-paced timed environment.'
+    ],
+    tracks: [
+      {
+        trackName: 'Track 1: Generative Design & Multimodal Prompting',
+        targetYear: '1st Year Students',
+        description: 'Challenged participants in invitation synthesis, logo recreation, and image generation using precision negative prompting and aspect control.',
+        winners: [
+          {
+            rank: '1st Place & Top Honors',
+            names: ['Chinmayee', 'Chris Royston Monteiro', 'Deeksha Ravi Moger']
+          }
+        ]
+      },
+      {
+        trackName: 'Track 2: Algorithmic Systems & AI Security',
+        targetYear: '2nd Year Students',
+        description: 'Evaluated participants on complex unstructured-to-JSON parsing, Python debugging through AI co-pilots, and Gemini AI security prompt extraction challenges.',
+        winners: [
+          {
+            rank: '1st Place & Top Positions',
+            names: ['Harimurali KS', 'Venus Suhani D’Lima', 'Venisha Snehal D’Souza']
+          }
+        ]
+      }
+    ],
+    highlights: [
+      'Co-hosted by AgentBlazer Club & CIPHER',
+      'Guided by Dr. Melwyn D\'Souza, Ms. Nisha J Roche & Ms. Jaishma K',
+      'Real-time automated evaluation scoreboard',
+      'Gemini AI Security & System Prompt Injection Defense',
+      'Certificates of Excellence and cash prizes awarded'
+    ],
+    galleryImages: [
+      {
+        url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80',
+        caption: 'Participants in intense prompt engineering coding session in CSE lab',
+        tag: 'CODING_SPRINT'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80',
+        caption: 'Team collaboration and prompt debugging on Gemini models',
+        tag: 'COLLABORATIVE_ANALYSIS'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80',
+        caption: 'Faculty coordinators evaluating structured JSON outputs and accuracy',
+        tag: 'JURY_EVALUATION'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80',
+        caption: 'Certificate distribution ceremony for Track 1 & Track 2 winners',
+        tag: 'AWARD_CEREMONY'
+      },
+      {
+        url: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80',
+        caption: 'Valedictory address on ethical AI and LLM security practices',
+        tag: 'VALEDICTORY_ADDRESS'
+      }
+    ]
+  }
+];
+
+export const ARCHIVE_ITEMS: ArchiveItem[] = [
+  {
+    num: '01',
+    id: 'applied-ml',
+    title: 'Applied Machine Learning',
+    category: 'AI & ML',
+    year: '2025',
+    description: 'Comprehensive walkthrough of feature engineering, scikit-learn pipelines, model hyperparameter tuning, and real-world inference deployments.',
+    tags: ['Scikit-Learn', 'Feature Store', 'Classification', 'Inference'],
+    leadSpeaker: 'AI Research Lab & Cipher Leads'
+  },
+  {
+    num: '02',
+    id: 'industrial-visit-1',
+    title: 'Industrial Visit',
+    category: 'Industry & Career',
+    year: '2025',
+    description: 'Excursion to premier enterprise IT parks, touring production tier-3 data centers, CI/CD operations, and cloud infrastructure control centers.',
+    tags: ['Cloud Infrastructure', 'Enterprise DevOps', 'Data Centers'],
+    leadSpeaker: 'Industry Relations Cell'
+  },
+  {
+    num: '03',
+    id: 'latex-tool',
+    title: 'LaTeX Tool',
+    category: 'Tools & Systems',
+    year: '2025',
+    description: 'Masterclass on professional research paper typesetting, mathematical equation styling, IEEE formatting, and automated bibliography management with BibTeX.',
+    tags: ['IEEE Standard', 'BibTeX', 'Research Publishing', 'Typography'],
+    leadSpeaker: 'Dept Research Committee'
+  },
+  {
+    num: '04',
+    id: 'rpa-uipath',
+    title: 'Robotic Process Automation using UiPath',
+    category: 'Development',
+    year: '2025',
+    description: 'Hands-on laboratory introducing software bots, workflow orchestrator nodes, document understanding OCR engines, and automated business processes.',
+    tags: ['UiPath', 'Bot Workflows', 'Enterprise RPA', 'OCR'],
+    leadSpeaker: 'UiPath Academic Alliance'
+  },
+  {
+    num: '05',
+    id: 'hackto-future-20',
+    title: 'HACKTO Future 20',
+    category: 'Development',
+    year: '2025',
+    description: 'Flagship 24-hour hackathon bringing together multidisciplinary engineering squads to formulate, prototype, and pitch civic & AI software solutions.',
+    tags: ['24h Hackathon', 'Rapid Prototyping', 'Product Pitch', 'Cash Prizes'],
+    leadSpeaker: 'CIPHER Tech Council'
+  },
+  {
+    num: '06',
+    id: 'sport-programming',
+    title: 'How to Win at the Sport of Programming',
+    category: 'Development',
+    year: '2025',
+    description: 'Competitive programming masterclass dissecting time complexities, dynamic programming recurrence relations, graph traversals, and ICPC strategies.',
+    tags: ['Competitive Coding', 'DP', 'Graph Theory', 'ICPC Prep'],
+    leadSpeaker: 'CodeChef & LeetCode Alumni'
+  },
+  {
+    num: '07',
+    id: 'google-crowdsource',
+    title: 'Introduction to Google Crowdsource',
+    category: 'Tools & Systems',
+    year: '2024',
+    description: 'Interactive session exploring data quality in machine learning models, diverse dataset validation, language translation benchmarks, and open community science.',
+    tags: ['Google AI', 'Dataset Diversity', 'Crowdsource Community'],
+    leadSpeaker: 'Google Crowdsource Influencers'
+  },
+  {
+    num: '08',
+    id: 'github-session',
+    title: 'Educational Session on GitHub',
+    category: 'Tools & Systems',
+    year: '2024',
+    description: 'From git init to collaborative upstream PRs: interactive workshop covering branch protection, merge conflict resolution, GitHub Actions CI, and markdown READMEs.',
+    tags: ['Git CLI', 'Actions CI/CD', 'Open Source PRs', 'Collaboration'],
+    leadSpeaker: 'GitHub Campus Experts'
+  },
+  {
+    num: '09',
+    id: 'industrial-visit-2',
+    title: 'Industrial Visit',
+    category: 'Industry & Career',
+    year: '2024',
+    description: 'On-site technical exposure visit to leading software engineering campuses and automotive embedded systems testing facilities.',
+    tags: ['Software Engineering', 'Automotive Embedded', 'QA Pipelines'],
+    leadSpeaker: 'Faculty Outreach Lead'
+  },
+  {
+    num: '10',
+    id: 'udaan-mock',
+    title: 'UDAAN Mock Interview',
+    category: 'Industry & Career',
+    year: '2024',
+    description: 'Rigorous campus interview simulation with senior alumni and HR specialists, featuring DSA technical screenings, system design rounds, and HR behavioral appraisals.',
+    tags: ['Mock Technical Rounds', 'System Design', 'Behavioral HR', 'Resume Audit'],
+    leadSpeaker: 'SJEC Placement Cell & Alumni Panel'
+  },
+  {
+    num: '11',
+    id: 'freshers-onboarding',
+    title: 'Freshers Onboarding Programme',
+    category: 'Academic & Grants',
+    year: '2024',
+    description: 'Departmental orientation introducing curriculum roadmaps, computing club domains, laboratory ethics, open-source communities, and senior mentorship pairings.',
+    tags: ['Branch Induction', 'Mentorship', 'Curriculum Guide'],
+    leadSpeaker: 'CIPHER Office Bearers'
+  },
+  {
+    num: '12',
+    id: 'kscst-projects',
+    title: 'Projects Funded by KSCST',
+    category: 'Academic & Grants',
+    year: '2024',
+    description: 'Showcase and grant writing incubator guiding students in submitting high-impact engineering projects to the Karnataka State Council for Science and Technology.',
+    tags: ['Research Grants', 'KSCST Funding', 'Patent Filing', 'State Innovation'],
+    leadSpeaker: 'Research Advisory Board'
+  },
+  {
+    num: '13',
+    id: 'genai-research',
+    title: 'Generative AI Tools for Research',
+    category: 'AI & ML',
+    year: '2024',
+    description: 'Empowering student scholars with ethical LLM literature review tools, semantic search engines, citation cross-examiners, and synthetic data validation frameworks.',
+    tags: ['Literature Synthesis', 'Semantic Search', 'Ethical AI', 'Paper Review'],
+    leadSpeaker: 'AI Faculty & Research Scholars'
+  },
+  {
+    num: '14',
+    id: 'blockchain-solidity',
+    title: 'Introduction to Blockchain: Solidity Workshop',
+    category: 'Development',
+    year: '2024',
+    description: 'Building decentralized applications on Ethereum: smart contract syntax, ERC-20 tokenomics, Hardhat testing environments, and gas optimization techniques.',
+    tags: ['Solidity', 'Ethereum EVM', 'Hardhat', 'Smart Contracts'],
+    leadSpeaker: 'Web3 Developer Collective'
+  },
+  {
+    num: '15',
+    id: 'star-uml',
+    title: 'Star UML',
+    category: 'Tools & Systems',
+    year: '2024',
+    description: 'Practical architectural blueprinting using Star UML: class diagrams, sequence flows, use-case modeling, state machine diagrams, and enterprise software documentation.',
+    tags: ['UML Modeling', 'Software Architecture', 'Sequence Flows', 'OOAD'],
+    leadSpeaker: 'Software Engineering Faculty'
+  },
+  {
+    num: '16',
+    id: 'genai-openai',
+    title: 'Generative AI: Custom Solutions using OpenAI',
+    category: 'AI & ML',
+    year: '2024',
+    description: 'End-to-end tutorial on crafting context-aware enterprise copilots, utilizing function calling, streaming APIs, embedding vector databases, and Retrieval-Augmented Generation (RAG).',
+    tags: ['OpenAI APIs', 'Vector Embeddings', 'RAG Architecture', 'Function Calling'],
+    leadSpeaker: 'CIPHER AI Lead'
+  },
+  {
+    num: '17',
+    id: 'react-node-workshop',
+    title: 'React.js and Node.js Workshop',
+    category: 'Development',
+    year: '2024',
+    description: 'Hands-on full-stack bootcamp building a live real-time task manager: React state and hooks, Tailwind styling, Express REST endpoints, JWT auth, and MongoDB models.',
+    tags: ['React 18', 'Node.js', 'Express', 'JWT Authentication', 'REST APIs'],
+    leadSpeaker: 'Full-Stack Student Mentors'
+  }
+];
+
+export const GALLERY_COLLAGE_IMAGES = [
+  {
+    url: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80',
+    title: 'Department Coding Lab Hackathon',
+    subtitle: 'Hands-on sprint in computer labs'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80',
+    title: 'Kalam Auditorium Grand Assembly',
+    subtitle: 'Lumière gala and branch inauguration'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80',
+    title: 'PROMPT OPS-2K26 Competition',
+    subtitle: 'Prompt engineering & AI tools challenge'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80',
+    title: 'Annual Student Assembly & Awards',
+    subtitle: 'Celebrating peer excellence in computing'
+  }
+];
