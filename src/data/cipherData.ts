@@ -59,7 +59,7 @@ export const LEADERS: Leader[] = [
     name: 'Elston Herold Pereira',
     role: 'PRESIDENT',
     category: 'executive',
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=700&q=80',
+    image: '/images/Elston.PNG',
     bio: 'Leads the CIPHER executive committee, orchestrating technical initiatives, university collaborations, and departmental vision.',
     quote: 'Computing is not just code—it is the architecture of modern possibility.',
     contributions: ['Spearheaded HacktoFuture 20', 'Overhauled student mentorship workflow', 'Led Industry Outreach sprint'],
@@ -72,7 +72,7 @@ export const LEADERS: Leader[] = [
     name: 'Raynell Lewis',
     role: 'VICE PRESIDENT',
     category: 'executive',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=700&q=80',
+    image: '/images/Raynell.JPG',
     bio: 'Oversees operational execution of departmental competitions, workshops, and inter-collegiate technical symposiums.',
     quote: 'Empowering peers to step outside textbooks and ship tangible software.',
     contributions: ['Coordinated PROMPT OPS-2K26', 'Curated Applied ML series', 'Initiated peer-to-peer code reviews'],
@@ -85,7 +85,7 @@ export const LEADERS: Leader[] = [
     name: 'Nazmin Ziya',
     role: 'TREASURER',
     category: 'executive',
-    image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=700&q=80',
+    image: '/images/Nazmin.JPG',
     bio: 'Manages CIPHER financial budget, sponsor relations, event grants, and fiscal governance across all flagship summits.',
     quote: 'Resource allocation and financial clarity drive sustainable innovation.',
     contributions: ['KSCST grant disbursements', 'Gala logistics budgeting', 'Sponsor procurement'],
@@ -98,7 +98,7 @@ export const LEADERS: Leader[] = [
     name: 'Jeslin Ninora',
     role: 'JOINT TREASURER',
     category: 'executive',
-    image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=700&q=80',
+    image: '/images/jeslin.jpeg',
     bio: 'Assists in auditing workshop expenditures, participant registrations, prize endowments, and logistics tracking.',
     quote: 'Precision in execution transforms good intentions into landmark events.',
     contributions: ['Inventory management', 'Registration desks automated flow', 'Audit documentation'],
@@ -111,7 +111,7 @@ export const LEADERS: Leader[] = [
     name: 'Chaitra R',
     role: 'SECRETARY',
     category: 'executive',
-    image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=700&q=80',
+    image: '/images/Chaitra.JPG',
     bio: 'Maintains official correspondence, meeting minutes, departmental notices, and liaison between students and faculty.',
     quote: 'Clear documentation is the bedrock of transparent community leadership.',
     contributions: ['Freshers Onboarding Guide', 'Executive board circulars', 'Academic calendar coordination'],
@@ -472,23 +472,25 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
 
 export const GALLERY_COLLAGE_IMAGES = [
   {
-    url: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80',
+    url: '/images/cipher1.JPG',
     title: 'Department Coding Lab Hackathon',
     subtitle: 'Hands-on sprint in computer labs'
   },
   {
-    url: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80',
+    url: '/images/cipher2.JPG',
     title: 'Kalam Auditorium Grand Assembly',
     subtitle: 'Lumière gala and branch inauguration'
   },
   {
-    url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80',
+    url: '/images/cipher3.JPG',
     title: 'PROMPT OPS-2K26 Competition',
     subtitle: 'Prompt engineering & AI tools challenge'
   },
   {
-    url: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80',
+    url: '/images/cipher4.JPG',
     title: 'Annual Student Assembly & Awards',
     subtitle: 'Celebrating peer excellence in computing'
   }
 ];
+
+    
