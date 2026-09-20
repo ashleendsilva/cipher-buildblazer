@@ -1,0 +1,6 @@
+{
+  "name": "CIPHER — Student Association of Computer Science & Engineering",
+  "description": "Official platform for CIPHER, the Student Association of the Department of Computer Science & Engineering at SJEC. Explore leadership, hackathons, technical workshops, and student initiatives.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
