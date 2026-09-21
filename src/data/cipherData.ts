@@ -232,27 +232,27 @@ export const EVENTS: EventItem[] = [
     ],
     galleryImages: [
       {
-        url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/20260325_141046.jpg',
         caption: 'Participants in intense prompt engineering coding session in CSE lab',
         tag: 'CODING_SPRINT'
       },
       {
-        url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/20260325_165226.jpg',
         caption: 'Team collaboration and prompt debugging on Gemini models',
         tag: 'COLLABORATIVE_ANALYSIS'
       },
       {
-        url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/20260325_165255.jpg',
         caption: 'Faculty coordinators evaluating structured JSON outputs and accuracy',
         tag: 'JURY_EVALUATION'
       },
       {
-        url: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/20260325_165737.jpg',
         caption: 'Certificate distribution ceremony for Track 1 & Track 2 winners',
         tag: 'AWARD_CEREMONY'
       },
       {
-        url: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/IMG_8492.JPG',
         caption: 'Valedictory address on ethical AI and LLM security practices',
         tag: 'VALEDICTORY_ADDRESS'
       }
