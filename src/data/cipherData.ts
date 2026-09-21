@@ -119,44 +119,7 @@ export const LEADERS: Leader[] = [
     linkedin: 'https://linkedin.com',
     email: 'chaitra.r@sjec.ac.in'
   },
-  {
-    id: 'dr-melwyn-dsouza',
-    name: "Dr. Melwyn D'Souza",
-    role: 'HEAD OF DEPARTMENT',
-    subtitle: 'HOD, Computer Science & Engineering',
-    category: 'faculty',
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=700&q=80',
-    bio: 'Guiding visionary for CIPHER, nurturing research ethics, industry partnerships, and state-of-the-art curriculum alignments.',
-    quote: 'Excellence in computing is achieved when academic discipline meets creative curiosity.',
-    contributions: ['Departmental Research Advisor', 'KSCST Project Endorsement', 'Industry MoU Lead'],
-    email: 'hodcse@sjec.ac.in'
-  },
-  {
-    id: 'ms-nisha-roche',
-    name: 'Ms. Nisha J Roche',
-    role: 'FACULTY COORDINATOR',
-    subtitle: 'Assistant Professor, Dept of CSE',
-    category: 'faculty',
-    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=700&q=80',
-    bio: 'Provides operational mentorship, program moderation, and guidance for technical hackathons and student governance.',
-    quote: 'Guiding the next generation of software pioneers to dream big and build responsibly.',
-    contributions: ['Faculty Mentor for AgentBlazer Club', 'PROMPT OPS-2K26 Oversight'],
-    email: 'nisha.roche@sjec.ac.in'
-  },
-  {
-    id: 'ms-jaishma-k',
-    name: 'Ms. Jaishma K',
-    role: 'FACULTY COORDINATOR',
-    subtitle: 'Assistant Professor, Dept of CSE',
-    category: 'faculty',
-    image: 'https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&w=700&q=80',
-    bio: 'Mentors student project development, competitive programming initiatives, and technical symposium compliance.',
-    quote: 'Continuous learning through hands-on experimentation builds true engineering character.',
-    contributions: ['Coordinated Industry Visits', 'Technical Session Reviewer'],
-    email: 'jaishma.k@sjec.ac.in'
-  }
 ];
-
 export const EVENTS: EventItem[] = [
   {
     id: 'lumiere-gala',
@@ -269,27 +232,27 @@ export const EVENTS: EventItem[] = [
     ],
     galleryImages: [
       {
-        url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/20260325_141046.jpg',
         caption: 'Participants in intense prompt engineering coding session in CSE lab',
         tag: 'CODING_SPRINT'
       },
       {
-        url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/20260325_165226.jpg',
         caption: 'Team collaboration and prompt debugging on Gemini models',
         tag: 'COLLABORATIVE_ANALYSIS'
       },
       {
-        url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/20260325_165255.jpg',
         caption: 'Faculty coordinators evaluating structured JSON outputs and accuracy',
         tag: 'JURY_EVALUATION'
       },
       {
-        url: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/20260325_165737.jpg',
         caption: 'Certificate distribution ceremony for Track 1 & Track 2 winners',
         tag: 'AWARD_CEREMONY'
       },
       {
-        url: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/IMG_8492.JPG',
         caption: 'Valedictory address on ethical AI and LLM security practices',
         tag: 'VALEDICTORY_ADDRESS'
       }

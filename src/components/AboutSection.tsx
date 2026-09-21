@@ -28,8 +28,15 @@ const ICON_MAP = {
 export const AboutSection: React.FC = () => {
   const headingText = useScrambleText('Who we are', true, 600, 10);
   const domainsHeading = useScrambleText('Our Domains', true, 700, 12);
-  const [selectedImage, setSelectedImage] = useState<{ url: string; title: string; subtitle: string } | null>(null);
-  const [selectedDomain, setSelectedDomain] = useState<DomainItem | null>(null);
+  const [selectedImage, setSelectedImage] = useState<{
+  url: string;
+  title: string;
+  subtitle: string;
+} | null>(null);
+
+const [selectedDomain, setSelectedDomain] = useState<DomainItem | null>(null);
+
+const [activeCard, setActiveCard] = useState(0);
 
   const pillars = [
     {
@@ -109,41 +116,120 @@ export const AboutSection: React.FC = () => {
             </div>
 
             {/* Photo Collage Grid */}
-            <div className="relative z-10 grid grid-cols-2 gap-3 sm:gap-4 p-2 sm:p-4 bg-[#060c08]/80 border border-emerald-950/80 rounded-xl backdrop-blur-sm shadow-2xl shadow-black/80">
-              {GALLERY_COLLAGE_IMAGES.map((img, i) => (
-                <div
-                  key={i}
-                  onClick={() => {
-                    playCyberClick();
-                    setSelectedImage(img);
-                  }}
-                  className={`relative group overflow-hidden rounded-lg border border-emerald-900/40 hover:border-emerald-500/80 cursor-pointer transition-all duration-300 ${
-                    i === 0 ? 'col-span-2 aspect-[21/9]' : 'aspect-[4/3]'
-                  }`}
-                >
-                  <img
-                    src={img.url}
-                    alt={img.title}
-                    className="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 group-hover:scale-105 transition-all duration-500"
-                    loading="lazy"
-                  />
-                  {/* Subtle matrix scanline tint */}
-                  <div className="absolute inset-0 bg-emerald-950/30 group-hover:bg-transparent transition-colors duration-300" />
+            {/* Throwing Cards Photo Stack */}
+{/* Throwing Cards Photo Stack */}
+<div className="relative z-10 h-[430px] sm:h-[500px] flex items-center justify-center">
 
-                  {/* Hover Tag Overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-end p-3">
-                    <span className="text-[10px] font-mono font-bold tracking-wider text-emerald-400 flex items-center gap-1">
-                      <ZoomIn className="w-3 h-3" />
-                      VIEW SNAPSHOT
-                    </span>
-                    <span className="text-xs font-semibold text-white truncate">{img.title}</span>
-                  </div>
+  {/* Glow behind cards */}
+  <div className="absolute w-[70%] h-[70%] bg-emerald-500/10 blur-3xl rounded-full pointer-events-none" />
 
-                  {/* Corner Accent */}
-                  <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-emerald-400 opacity-60 group-hover:opacity-100" />
-                </div>
-              ))}
-            </div>
+  {GALLERY_COLLAGE_IMAGES.map((img, i) => {
+    const total = GALLERY_COLLAGE_IMAGES.length;
+
+    // Makes the active card appear on top
+    const position = (i - activeCard + total) % total;
+
+    const rotations = [-6, 4, -3, 7, -5, 3];
+
+    return (
+      <motion.div
+        key={i}
+        animate={{
+          x:
+            position === 0
+              ? 0
+              : position === 1
+              ? 35
+              : position === 2
+              ? -35
+              : 0,
+
+          y:
+            position === 0
+              ? 0
+              : position === 1
+              ? -8
+              : position === 2
+              ? 8
+              : 0,
+
+          rotate:
+            position === 0
+              ? 0
+              : rotations[i % rotations.length],
+
+          scale:
+            position === 0
+              ? 1
+              : position === 1
+              ? 0.96
+              : position === 2
+              ? 0.92
+              : 0.88,
+
+          opacity:
+            position > 3
+              ? 0
+              : 1,
+        }}
+        transition={{
+          duration: 0.5,
+          type: "spring",
+          stiffness: 120,
+          damping: 15,
+        }}
+        onClick={() => {
+          if (position === 0) {
+            playCyberClick();
+
+            // Move current card to the back
+            setActiveCard((prev) => (prev + 1) % total);
+          }
+        }}
+        className="absolute w-[85%] sm:w-[75%] max-w-[520px] aspect-[4/3] cursor-pointer"
+        style={{
+          zIndex: total - position,
+        }}
+      >
+        <div className="relative w-full h-full overflow-hidden rounded-xl border-2 border-emerald-900/70 bg-[#07120a] shadow-2xl shadow-black/80">
+
+          {/* Image */}
+          <img
+            src={img.url}
+            alt={img.title}
+            className="w-full h-full object-cover grayscale contrast-125 hover:grayscale-0 transition-all duration-500"
+            loading="lazy"
+          />
+
+          {/* Green overlay */}
+          <div className="absolute inset-0 bg-emerald-950/20 hover:bg-transparent transition-colors duration-300" />
+
+          {/* Bottom information */}
+          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-4 pt-12">
+
+            <span className="text-[10px] font-mono font-bold tracking-wider text-emerald-400 flex items-center gap-1">
+              <ZoomIn className="w-3 h-3" />
+              {position === 0 ? "CLICK TO NEXT" : "VIEW SNAPSHOT"}
+            </span>
+
+            <h4 className="text-sm sm:text-base font-semibold text-white mt-1">
+              {img.title}
+            </h4>
+
+          </div>
+
+          {/* Corner accents */}
+          <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-emerald-400/70" />
+          <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-emerald-400/70" />
+          <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-emerald-400/70" />
+          <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-emerald-400/70" />
+
+        </div>
+      </motion.div>
+    );
+  })}
+
+</div>
 
             {/* Floating Live Indicator Badge */}
             <div className="absolute -bottom-4 left-6 sm:left-12 z-20 px-3.5 py-1.5 bg-[#08150c] border border-emerald-600/80 rounded-full flex items-center gap-2 shadow-lg shadow-emerald-950/60 text-xs font-mono text-emerald-300">
