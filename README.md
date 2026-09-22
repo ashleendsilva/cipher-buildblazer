@@ -1,20 +1,53 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# CIPHER — Student Association of CSE
+> **St Joseph Engineering College (SJEC)**  
+> *Official platform for the Student Association of the Department of Computer Science & Engineering.*
 
-# Run and deploy your AI Studio app
+---
 
-This contains everything you need to run your app locally.
+## ⚡ Overview
 
-View your app in AI Studio: https://ai.studio/apps/11eb2932-fa14-4219-9e1a-fdd8f2685958
+**CIPHER** is an interactive web platform for the CSE Student Association at SJEC. It highlights departmental leadership, technical workshops, flagship hackathons, and student initiatives with an interactive cyberpunk interface.
 
-## Run Locally
+---
 
-**Prerequisites:**  Node.js
+## 🛠️ Tech Stack
 
+- **Frontend**: React 19, TypeScript, Vite
+- **Styling**: Tailwind CSS v4
+- **Animation & Icons**: Motion, Lucide React
+- **Graphics & Audio**: HTML5 Canvas, Web Audio API
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+---
+
+## 🚀 Getting Started
+
+### 1. Installation
+```bash
+npm install
+```
+
+### 2. Run Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### 3. Build for Production
+```bash
+npm run build
+```
+
+---
+
+## 📜 Available Scripts
+
+- `npm run dev` — Run development server on port 3000
+- `npm run build` — Build production bundle to `dist/`
+- `npm run preview` — Locally preview the production build
+- `npm run lint` — Type-check codebase with `tsc --noEmit`
+
+---
+
+## 📄 License
+
+MIT © CIPHER, Department of Computer Science & Engineering, SJEC.
