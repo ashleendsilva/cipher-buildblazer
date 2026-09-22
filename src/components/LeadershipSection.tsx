@@ -12,7 +12,6 @@ import {
 import { LEADERS } from '../data/cipherData';
 import { Leader } from '../types';
 import { MatrixRainCanvas } from './MatrixRainCanvas';
-import { TopographicMeshCanvas } from './TopographicMeshCanvas';
 import { useScrambleText } from '../utils/scrambleText';
 import { playCyberClick } from '../utils/audio';
 
@@ -87,12 +86,7 @@ export const LeadershipSection: React.FC = () => {
   };
 
   return (
-    <section id="leadership" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-[#040805] border-t border-emerald-950/60 overflow-hidden">
-      {/* Topographic Mesh Canvas Contour Lines in the Background */}
-      <div className="absolute inset-0 z-0 opacity-40 pointer-events-none overflow-hidden">
-        <TopographicMeshCanvas />
-      </div>
-
+    <section id="leadership" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-transparent border-t border-emerald-950/60 overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
         {/* Section Header */}
         <div className="mb-10">

@@ -1,6 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 
-export const TopographicMeshCanvas: React.FC = () => {
+interface TopographicMeshCanvasProps {
+  fullPage?: boolean;
+}
+
+export const TopographicMeshCanvas: React.FC<TopographicMeshCanvasProps> = ({ fullPage = true }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -10,72 +14,108 @@ export const TopographicMeshCanvas: React.FC = () => {
     if (!ctx) return;
 
     let animId: number;
-    let width = (canvas.width = canvas.parentElement?.clientWidth || window.innerWidth);
-    let height = (canvas.height = canvas.parentElement?.clientHeight || window.innerHeight);
+    let width = 0;
+    let height = 0;
+
+    const resize = () => {
+      if (!canvas) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = fullPage ? window.innerWidth : (canvas.parentElement?.clientWidth || window.innerWidth);
+      height = fullPage ? window.innerHeight : (canvas.parentElement?.clientHeight || window.innerHeight);
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.resetTransform?.();
+      ctx.scale(dpr, dpr);
+    };
+
+    resize();
+    window.addEventListener('resize', resize);
 
     let mouseX = width / 2;
     let mouseY = height / 2;
     let targetMouseX = mouseX;
     let targetMouseY = mouseY;
+    let scrollY = window.scrollY || 0;
+    let targetScrollY = scrollY;
 
     const onMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      targetMouseX = e.clientX - rect.left;
-      targetMouseY = e.clientY - rect.top;
+      if (fullPage) {
+        targetMouseX = e.clientX;
+        targetMouseY = e.clientY;
+      } else {
+        const rect = canvas.getBoundingClientRect();
+        targetMouseX = e.clientX - rect.left;
+        targetMouseY = e.clientY - rect.top;
+      }
     };
 
-    window.addEventListener('mousemove', onMouseMove);
+    const onScroll = () => {
+      targetScrollY = window.scrollY || 0;
+    };
+
+    window.addEventListener('mousemove', onMouseMove, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
 
     let time = 0;
-    const linesCount = 28;
 
     const render = () => {
-      time += 0.008;
-      // Smooth lerp mouse
+      time += 0.009;
+      // Smooth lerp mouse & scroll parallax
       mouseX += (targetMouseX - mouseX) * 0.05;
       mouseY += (targetMouseY - mouseY) * 0.05;
+      scrollY += (targetScrollY - scrollY) * 0.08;
 
       ctx.clearRect(0, 0, width, height);
 
-      // Radial dark vignette around canvas
+      // Subtle radial dark gradient vignette
       const grad = ctx.createRadialGradient(
         width / 2,
         height / 2,
         width * 0.1,
         width / 2,
         height / 2,
-        width * 0.75
+        width * 0.85
       );
-      grad.addColorStop(0, 'rgba(10, 30, 18, 0.35)');
+      grad.addColorStop(0, 'rgba(8, 28, 16, 0.22)');
       grad.addColorStop(1, 'rgba(5, 8, 6, 0)');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
 
-      // Render topographic contour lines
-      ctx.lineWidth = 1;
+      // Render flowing topographic contour wave lines across the canvas
+      const linesCount = Math.max(30, Math.floor(height / 36));
+      const points = Math.max(65, Math.floor(width / 22));
+      const scrollPhase = (scrollY * 0.0025);
 
       for (let i = 0; i < linesCount; i++) {
         const lineBaseY = (height / linesCount) * (i + 0.5);
+        const distFromMouseY = Math.abs(lineBaseY - mouseY);
+        const isNearCursorY = distFromMouseY < 200;
+        const cursorGlow = isNearCursorY ? Math.max(0, 1 - distFromMouseY / 200) : 0;
+
         ctx.beginPath();
 
-        const alpha = Math.sin((i / linesCount) * Math.PI) * 0.22 + 0.05;
-        ctx.strokeStyle = `rgba(34, 197, 94, ${alpha})`;
+        // Parabolic wave opacity curve, brightest across the middle third
+        const normalizedIdx = i / linesCount;
+        const baseAlpha = Math.sin(normalizedIdx * Math.PI) * 0.22 + 0.05;
+        const finalAlpha = Math.min(0.65, baseAlpha + cursorGlow * 0.28);
+        
+        ctx.strokeStyle = `rgba(34, 197, 94, ${finalAlpha})`;
+        ctx.lineWidth = 1 + cursorGlow * 0.8;
 
-        const points = 60;
         for (let p = 0; p <= points; p++) {
           const x = (width / points) * p;
 
-          // Perlin-like multi-frequency sine deformation
-          const wave1 = Math.sin(p * 0.15 + time + i * 0.2) * 22;
-          const wave2 = Math.cos(p * 0.08 - time * 0.7 + i * 0.15) * 35;
-          const wave3 = Math.sin(p * 0.04 + time * 1.2) * 15;
+          // Multi-frequency harmonic wave deformation with scroll parallax
+          const wave1 = Math.sin(p * 0.12 + time * 1.1 + i * 0.2 + scrollPhase) * 24;
+          const wave2 = Math.cos(p * 0.06 - time * 0.75 + i * 0.14) * 34;
+          const wave3 = Math.sin(p * 0.03 + time * 1.4 + i * 0.08) * 16;
 
-          // Mouse cursor gravity ripple
+          // Mouse cursor gravity and dynamic wave displacement
           const dx = x - mouseX;
           const dy = lineBaseY - mouseY;
           const dist = Math.sqrt(dx * dx + dy * dy);
           const mouseDistFactor = Math.max(0, 1 - dist / 320);
-          const mouseDisplace = Math.sin(dist * 0.03 - time * 4) * 25 * mouseDistFactor;
+          const mouseDisplace = Math.sin(dist * 0.03 - time * 4.2) * 26 * mouseDistFactor;
 
           const y = lineBaseY + wave1 + wave2 + wave3 + mouseDisplace;
 
@@ -93,25 +133,18 @@ export const TopographicMeshCanvas: React.FC = () => {
 
     animId = requestAnimationFrame(render);
 
-    const handleResize = () => {
-      if (!canvas || !canvas.parentElement) return;
-      width = canvas.width = canvas.parentElement.clientWidth;
-      height = canvas.height = canvas.parentElement.clientHeight;
-    };
-
-    window.addEventListener('resize', handleResize);
-
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', resize);
     };
-  }, []);
+  }, [fullPage]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 pointer-events-none w-full h-full opacity-60"
+      className={`${fullPage ? 'fixed inset-0 z-0' : 'absolute inset-0 z-0'} pointer-events-none w-full h-full opacity-65`}
     />
   );
 };

@@ -198,10 +198,7 @@ export const EventsSection: React.FC = () => {
   };
 
   return (
-    <section id="events" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-[#050806] border-t border-emerald-950/60 overflow-hidden font-mono">
-      {/* Background cyber grid */}
-      <div className="absolute inset-0 cyber-grid opacity-20 pointer-events-none" />
-
+    <section id="events" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-transparent border-t border-emerald-950/60 overflow-hidden font-mono">
       <div className="max-w-7xl mx-auto relative z-10">
         {/* 1. Flagship Events Header */}
         <div className="mb-14">
