@@ -144,44 +144,44 @@ export const EVENTS: EventItem[] = [
     ],
     galleryImages: [
       {
-        url: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/IMG_7354.JPG',
         caption: 'Kalam Auditorium stage presentation and inaugural address',
-        tag: 'AUDITORIUM_INAUGURATION'
+        tag: ''
       },
       {
-        url: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/IMG_7350.JPG',
         caption: 'Lumière themed stage lighting and commemorative floral installations',
-        tag: 'STAGE_GLOW'
+        tag: ''
       },
       {
-        url: 'https://images.unsplash.com/photo-1527529482837-4698179dc6ce?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/IMG_7369.JPG',
         caption: 'CIPHER student association executive committee induction ceremony',
-        tag: 'EXECUTIVE_INDUCTION'
+        tag: ''
       },
       {
-        url: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/IMG_7372.JPG',
         caption: 'Red & gold coordinated celebratory formal gathering with faculty mentors',
-        tag: 'FACULTY_GATHERING'
+        tag: ''
       },
       {
-        url: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/IMG_7386.JPG',
         caption: 'Auditorium crowd of CSE freshers and senior department peers',
-        tag: 'STUDENT_COHORT'
+        tag: ''
       },
       {
-        url: 'https://images.unsplash.com/photo-1531058020387-3be344556be6?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/IMG_7354.JPG',
         caption: 'Cultural performances highlighting rhythm and engineering camaraderie',
-        tag: 'CULTURAL_PERFORMANCE'
+        tag: ''
       },
       {
-        url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/IMG_7388.JPG',
         caption: 'Interactive branch welcome games and departmental icebreakers',
-        tag: 'COMMUNITY_ICEBREAKER'
+        tag: ''
       },
       {
-        url: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=80',
+        url: '/images/IMG_7397.JPG',
         caption: 'Grand finale group photograph with dignitaries, faculty & Cipher leaders',
-        tag: 'FINALE_GROUP'
+        tag: ''
       }
     ]
   },
