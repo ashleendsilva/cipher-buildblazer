@@ -146,7 +146,7 @@ export const EVENTS: EventItem[] = [
       {
         url: '/images/IMG_7354.JPG',
         caption: 'Kalam Auditorium stage presentation and inaugural address',
-        tag: ''
+        tag: 'LUMIERE GALA INAUGURATION'
       },
       {
         url: '/images/IMG_7350.JPG',
@@ -234,27 +234,27 @@ export const EVENTS: EventItem[] = [
       {
         url: '/images/20260325_141046.jpg',
         caption: 'Participants in intense prompt engineering coding session in CSE lab',
-        tag: 'CODING_SPRINT'
+        tag: 'PROMPT OPS'
       },
       {
         url: '/images/20260325_165226.jpg',
         caption: 'Team collaboration and prompt debugging on Gemini models',
-        tag: 'COLLABORATIVE_ANALYSIS'
+        tag: 'PROMPT OPS'
       },
       {
         url: '/images/20260325_165255.jpg',
         caption: 'Faculty coordinators evaluating structured JSON outputs and accuracy',
-        tag: 'JURY_EVALUATION'
+        tag: 'PROMPT OPS'
       },
       {
         url: '/images/20260325_165737.jpg',
         caption: 'Certificate distribution ceremony for Track 1 & Track 2 winners',
-        tag: 'AWARD_CEREMONY'
+        tag: 'PROMPT OPS'
       },
       {
         url: '/images/IMG_8492.JPG',
         caption: 'Valedictory address on ethical AI and LLM security practices',
-        tag: 'VALEDICTORY_ADDRESS'
+        tag: 'PROMPT OPS'
       }
     ]
   }
