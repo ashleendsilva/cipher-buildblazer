@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Github,
@@ -7,7 +7,10 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
-  Search
+  Search,
+  Play,
+  Pause,
+  Zap,
 } from 'lucide-react';
 import { LEADERS } from '../data/cipherData';
 import { Leader } from '../types';
@@ -18,19 +21,29 @@ import { playCyberClick } from '../utils/audio';
 export const LeadershipSection: React.FC = () => {
   const headingText = useScrambleText('Leadership Structure', true, 750, 14);
   const [selectedLeader, setSelectedLeader] = useState<Leader | null>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(
-    typeof window !== 'undefined' ? window.innerWidth : 1024
-  );
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [hoveredLeaderId, setHoveredLeaderId] = useState<string | null>(null);
+  const [isPausedState, setIsPausedState] = useState(false);
+  const [speedMultiplier, setSpeedMultiplier] = useState<1 | 2 | 3>(1); // Default: 1 = Calm & smooth glide
 
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const offsetRef = useRef(0);
+  const targetOffsetRef = useRef(0);
+  const isPausedRef = useRef(false);
+  const speedRef = useRef(0.75); // Calibrated gentle speed
+  const touchStartXRef = useRef<number | null>(null);
+
+  // Synchronize speed multiplier
   useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    // Calibrated comfortable speeds: 1x (Calm) = 0.75px/frame (~45px/sec), 2x (Medium) = 1.25px/frame (~75px/sec), 3x (Brisk) = 1.85px/frame (~110px/sec)
+    speedRef.current = speedMultiplier === 1 ? 0.75 : speedMultiplier === 2 ? 1.25 : 1.85;
+  }, [speedMultiplier]);
 
+  // Synchronize pause state (paused when modal open or when hovering a card or manually paused)
+  useEffect(() => {
+    isPausedRef.current = !!selectedLeader || isPausedState;
+  }, [selectedLeader, isPausedState]);
+
+  // Escape to close modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -42,220 +55,282 @@ export const LeadershipSection: React.FC = () => {
   }, []);
 
   const leaders = LEADERS;
-  // Duplicate array to allow seamless carousel looping across all cards
-  const displayLeaders = [...leaders, ...leaders];
+  // Duplicate array 3 times for a completely seamless, gap-free infinite scrolling marquee on any screen width
+  const displayLeaders = [...leaders, ...leaders, ...leaders];
 
-  // Determine how many cards are visible horizontally
-  const visibleCards =
-    windowWidth < 640 ? 1.25 : windowWidth < 768 ? 2.2 : windowWidth < 1024 ? 3.2 : windowWidth < 1280 ? 4 : 4.4;
-
-  // Automatic slide triggered when mouse is hovering over the carousel
+  // RequestAnimationFrame continuous sliding loop
   useEffect(() => {
-    if (!isHovered || leaders.length <= 1) return;
+    const track = trackRef.current;
+    if (!track) return;
 
-    const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % leaders.length);
-    }, 2200);
+    let animId: number;
+    let lastTime = performance.now();
 
-    return () => clearInterval(timer);
-  }, [isHovered, leaders.length]);
+    const loop = (currentTime: number) => {
+      const dt = Math.min((currentTime - lastTime) / 1000, 0.1);
+      lastTime = currentTime;
 
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev <= 0 ? leaders.length - 1 : prev - 1));
+      // Exactly 1/3 of the track represents one complete cycle of leaders
+      const singleSetWidth = track.scrollWidth / 3;
+
+      if (!isPausedRef.current && singleSetWidth > 0) {
+        // Fast continuous forward motion
+        targetOffsetRef.current += speedRef.current * (dt * 60);
+      }
+
+      // Smooth interpolation to target offset
+      offsetRef.current += (targetOffsetRef.current - offsetRef.current) * 0.18;
+
+      // Mathematical wrap-around for infinite seamless sliding
+      if (singleSetWidth > 0) {
+        while (offsetRef.current >= singleSetWidth) {
+          offsetRef.current -= singleSetWidth;
+          targetOffsetRef.current -= singleSetWidth;
+        }
+        while (offsetRef.current < 0) {
+          offsetRef.current += singleSetWidth;
+          targetOffsetRef.current += singleSetWidth;
+        }
+      }
+
+      if (track) {
+        track.style.transform = `translate3d(-${offsetRef.current}px, 0, 0)`;
+      }
+
+      animId = requestAnimationFrame(loop);
+    };
+
+    animId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animId);
+  }, []);
+
+  // Manual Nudge Controls
+  const nudgePrev = () => {
+    playCyberClick();
+    targetOffsetRef.current -= 310;
   };
 
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % leaders.length);
+  const nudgeNext = () => {
+    playCyberClick();
+    targetOffsetRef.current += 310;
   };
 
+  // Touch Swipe Handlers for mobile devices
   const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStartX(e.touches[0].clientX);
+    touchStartXRef.current = e.touches[0].clientX;
+    isPausedRef.current = true;
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX === null) return;
-    const diff = touchStartX - e.changedTouches[0].clientX;
-    if (diff > 45) {
-      playCyberClick();
-      nextSlide();
-    } else if (diff < -45) {
-      playCyberClick();
-      prevSlide();
-    }
-    setTouchStartX(null);
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null) return;
+    const diff = touchStartXRef.current - e.touches[0].clientX;
+    targetOffsetRef.current += diff * 1.2;
+    offsetRef.current += diff * 1.2;
+    touchStartXRef.current = e.touches[0].clientX;
   };
+
+  const handleTouchEnd = () => {
+    touchStartXRef.current = null;
+    isPausedRef.current = !!selectedLeader || isPausedState;
+  };
+
+  // Card Mouse Handlers: Instantly stops sliding when mouse pointer is on the specific image/card
+  const handleCardMouseEnter = (leaderId: string) => {
+    setIsPausedState(true);
+    setHoveredLeaderId(leaderId);
+  };
+
+  const handleCardMouseLeave = () => {
+    setIsPausedState(false);
+    setHoveredLeaderId(null);
+  };
+
+  const hoveredLeaderObj = leaders.find((l) => l.id === hoveredLeaderId);
 
   return (
     <section id="leadership" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-transparent border-t border-emerald-950/60 overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
-        {/* Section Header */}
-        <div className="mb-10">
-          <div className="text-xs font-mono tracking-widest text-emerald-400 uppercase flex items-center gap-2">
-            <span className="text-emerald-400 font-bold">//</span>
-            <span>GOVERNANCE</span>
+        {/* Section Header with Status Bar and Speed Controls */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+          <div>
+            <div className="text-xs font-mono tracking-widest text-emerald-400 uppercase flex items-center gap-2">
+              <span className="text-emerald-400 font-bold">//</span>
+              <span>GOVERNANCE &amp; ARCHITECTURE</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white font-mono mt-2 drop-shadow-[0_0_25px_rgba(34,197,94,0.35)]">
+              {headingText}
+            </h2>
+            <p className="mt-2 text-sm text-emerald-400/80 font-sans max-w-xl">
+              Elected student office bearers orchestrating technical initiatives, competitions, and computing culture.
+            </p>
           </div>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white font-mono mt-2 drop-shadow-[0_0_25px_rgba(34,197,94,0.35)]">
-            {headingText}
-          </h2>
-          <p className="mt-2 text-sm text-emerald-400/80 font-sans max-w-xl">
-            Elected student office bearers orchestrating technical initiatives, competitions, and computing culture.
-          </p>
+
+          {/* Cybernetic Status Pill & Speed Controls */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Status indicator badge */}
+            
+
+            {/* Play/Pause toggle */}
+            
+
+            {/* Speed Selector Pills */}
+            
+          </div>
         </div>
 
-        {/* Carousel Track with auto-slide on hover */}
-        <div
-          className="relative mt-4 font-mono group/track"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        >
-          {/* Subtle Navigation Chevrons on Track Sides */}
+        {/* Carousel Outer Track with Side Navigation Chevrons */}
+        <div className="relative mt-2 font-mono group/track">
+          {/* Left Navigation Chevron */}
           <button
-            onClick={() => {
-              playCyberClick();
-              prevSlide();
-            }}
+            onClick={nudgePrev}
             title="Previous profile"
             aria-label="Previous profile"
-            className="hidden sm:flex absolute -left-4 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-black/80 border border-emerald-900 text-emerald-400 hover:border-emerald-400 hover:text-white hover:bg-emerald-950 transition-all cursor-pointer active:scale-95 shadow-xl opacity-0 group-hover/track:opacity-100"
+            className="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3 rounded-full bg-black/90 border border-emerald-500/80 text-emerald-400 hover:border-emerald-300 hover:text-white hover:bg-emerald-950 transition-all cursor-pointer active:scale-95 shadow-[0_0_15px_rgba(0,0,0,0.8)] opacity-70 group-hover/track:opacity-100"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
 
+          {/* Right Navigation Chevron */}
           <button
-            onClick={() => {
-              playCyberClick();
-              nextSlide();
-            }}
+            onClick={nudgeNext}
             title="Next profile"
             aria-label="Next profile"
-            className="hidden sm:flex absolute -right-4 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-black/80 border border-emerald-900 text-emerald-400 hover:border-emerald-400 hover:text-white hover:bg-emerald-950 transition-all cursor-pointer active:scale-95 shadow-xl opacity-0 group-hover/track:opacity-100"
+            className="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3 rounded-full bg-black/90 border border-emerald-500/80 text-emerald-400 hover:border-emerald-300 hover:text-white hover:bg-emerald-950 transition-all cursor-pointer active:scale-95 shadow-[0_0_15px_rgba(0,0,0,0.8)] opacity-70 group-hover/track:opacity-100"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
 
-          {/* Carousel Viewport */}
+          {/* Overflow-Hidden Viewport Mask */}
           <div
-            className="overflow-hidden p-1 sm:p-2"
+            className="overflow-hidden py-4 px-1"
             onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
+            {/* Continuously Sliding Hardware-Accelerated Strip */}
             <div
-              className="flex transition-transform duration-700 ease-in-out"
-              style={{
-                transform: `translateX(-${currentIndex * (100 / visibleCards)}%)`,
-              }}
+              ref={trackRef}
+              className="flex will-change-transform select-none"
+              style={{ transform: 'translate3d(0, 0, 0)' }}
             >
-              {displayLeaders.map((leader, idx) => (
-                <div
-                  key={`${leader.id}-${idx}`}
-                  style={{ width: `${100 / visibleCards}%` }}
-                  className="flex-shrink-0 px-2 sm:px-2.5"
-                >
+              {displayLeaders.map((leader, idx) => {
+                const isThisCardHovered = hoveredLeaderId === leader.id;
+
+                return (
                   <div
-                    onClick={() => {
-                      playCyberClick();
-                      setSelectedLeader(leader);
-                    }}
-                    className="relative group bg-[#060e08]/90 border border-emerald-950/80 hover:border-2 hover:border-emerald-500 rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_0_25px_rgba(34,197,94,0.4)] flex flex-col h-full"
+                    key={`${leader.id}-${idx}`}
+                    className="flex-shrink-0 w-[240px] sm:w-[270px] md:w-[295px] px-2.5 sm:px-3"
+                    onMouseEnter={() => handleCardMouseEnter(leader.id)}
+                    onMouseLeave={handleCardMouseLeave}
                   >
-                    {/* Portrait Image Container with Matrix Rain Background */}
-                    <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#030604]">
-                      <MatrixRainCanvas opacity={0.35} speed={0.9} fontSize={12} />
+                    <div
+                      onClick={() => {
+                        playCyberClick();
+                        setSelectedLeader(leader);
+                      }}
+                      className={`relative group bg-[#060e08]/95 border rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 flex flex-col h-full ${
+                        isThisCardHovered
+                          ? 'border-2 border-emerald-400 -translate-y-2 shadow-[0_0_30px_rgba(34,197,94,0.55)] ring-1 ring-emerald-400'
+                          : 'border-emerald-950/80 hover:border-emerald-500 hover:-translate-y-1.5 hover:shadow-[0_0_20px_rgba(34,197,94,0.35)]'
+                      }`}
+                    >
+                      {/* Interactive Target Lock HUD Indicator (Visible when mouse pointer is on this specific image}
 
-                      {/* Portrait Image */}
-                      <img
-                        src={leader.image}
-                        alt={leader.name}
-                        className="relative z-10 w-full h-full object-cover object-top grayscale contrast-125 group-hover:grayscale-0 group-hover:contrast-100 group-hover:scale-105 transition-all duration-500"
-                        loading="lazy"
-                      />
+                      {/* Portrait Image Container with Matrix Rain Background */}
+                      <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#030604]">
+                        <MatrixRainCanvas
+                          opacity={isThisCardHovered ? 0.55 : 0.3}
+                          speed={isThisCardHovered ? 1.4 : 0.8}
+                          fontSize={12}
+                        />
 
-                      {/* Bottom vignette gradient */}
-                      <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#060e08] to-transparent z-20 pointer-events-none" />
+                        {/* Leader Portrait Image */}
+                        <img
+                          src={leader.image}
+                          alt={leader.name}
+                          className={`relative z-10 w-full h-full object-cover object-top transition-all duration-500 ${
+                            isThisCardHovered
+                              ? 'grayscale-0 contrast-100 scale-105'
+                              : 'grayscale contrast-125 group-hover:grayscale-0 group-hover:contrast-100 group-hover:scale-105'
+                          }`}
+                          loading="lazy"
+                        />
 
-                      {/* Green Circular Magnifying Search Button at Bottom-Right */}
-                      <div className="absolute bottom-3 right-3 z-30 w-7 h-7 rounded-full bg-emerald-950/90 border border-emerald-500/80 flex items-center justify-center text-emerald-400 shadow-md group-hover:bg-emerald-500 group-hover:text-black transition-all">
-                        <Search className="w-3.5 h-3.5" />
+                        {/* Bottom vignette gradient */}
+                        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#060e08] to-transparent z-20 pointer-events-none" />
+
+                        {/* Circular Magnifying Search Button at Bottom-Right */}
+                        <div
+                          className={`absolute bottom-3 right-3 z-30 w-7 h-7 rounded-full border flex items-center justify-center shadow-md transition-all ${
+                            isThisCardHovered
+                              ? 'bg-emerald-400 text-black border-emerald-300 scale-110'
+                              : 'bg-emerald-950/90 border-emerald-500/80 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-black'
+                          }`}
+                        >
+                          <Search className="w-3.5 h-3.5" />
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Centered Meta Info */}
-                    <div className="p-4 pt-2 text-center flex flex-col items-center justify-between flex-1 bg-[#060e08] z-20">
-                      <div className="w-full">
-                        {/* Role in tracked uppercase green text */}
-                        <div className="text-[11px] font-bold tracking-widest text-emerald-400 uppercase">
-                          {leader.role}
+                      {/* Centered Meta Info */}
+                      <div className="p-4 pt-2 text-center flex flex-col items-center justify-between flex-1 bg-[#060e08] z-20">
+                        <div className="w-full">
+                          {/* Role in tracked uppercase green text */}
+                          <div className="text-[11px] font-bold tracking-widest text-emerald-400 uppercase">
+                            {leader.role}
+                          </div>
+
+                          {/* Leader Name */}
+                          <h3
+                            className={`text-base sm:text-lg font-bold transition-colors mt-1 ${
+                              isThisCardHovered ? 'text-emerald-300' : 'text-white group-hover:text-emerald-300'
+                            }`}
+                          >
+                            {leader.name}
+                          </h3>
+
+                          {leader.subtitle && (
+                            <p className="text-xs text-emerald-600 font-sans mt-0.5">
+                              {leader.subtitle}
+                            </p>
+                          )}
                         </div>
 
-                        {/* Leader Name */}
-                        <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-emerald-300 transition-colors mt-1">
-                          {leader.name}
-                        </h3>
-
-                        {leader.subtitle && (
-                          <p className="text-xs text-emerald-600 font-sans mt-0.5">
-                            {leader.subtitle}
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Centered Social Icons */}
-                      <div className="mt-3 flex items-center justify-center gap-3">
-                        {leader.github && (
-                          <a
-                            href={leader.github}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-emerald-400/80 hover:text-white transition-colors"
-                            title="GitHub"
-                            aria-label="GitHub"
-                          >
-                            <Github className="w-4 h-4" />
-                          </a>
-                        )}
-                        {leader.linkedin && (
-                          <a
-                            href={leader.linkedin}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-emerald-400/80 hover:text-white transition-colors"
-                            title="LinkedIn"
-                            aria-label="LinkedIn"
-                          >
-                            <Linkedin className="w-4 h-4" />
-                          </a>
-                        )}
+                        {/* Centered Social Icons */}
+                        <div className="mt-3 flex items-center justify-center gap-3">
+                          {leader.github && (
+                            <a
+                              href={leader.github}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-emerald-400/80 hover:text-white transition-colors"
+                              title="GitHub"
+                              aria-label="GitHub"
+                            >
+                              <Github className="w-4 h-4" />
+                            </a>
+                          )}
+                          {leader.linkedin && (
+                            <a
+                              href={leader.linkedin}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-emerald-400/80 hover:text-white transition-colors"
+                              title="LinkedIn"
+                              aria-label="LinkedIn"
+                            >
+                              <Linkedin className="w-4 h-4" />
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
-
-          {/* Dots Indicator */}
-          {leaders.length > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-6">
-              {leaders.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    playCyberClick();
-                    setCurrentIndex(idx);
-                  }}
-                  title={`Go to item ${idx + 1}`}
-                  aria-label={`Go to item ${idx + 1}`}
-                  className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                    currentIndex % leaders.length === idx
-                      ? 'w-8 bg-emerald-400 shadow-[0_0_8px_#22c55e]'
-                      : 'w-2 bg-emerald-950 hover:bg-emerald-800'
-                  }`}
-                />
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
@@ -370,4 +445,3 @@ export const LeadershipSection: React.FC = () => {
     </section>
   );
 };
-
