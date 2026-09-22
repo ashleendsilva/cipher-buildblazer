@@ -1,12 +1,11 @@
 import React from 'react';
-import { Shield, Github, Linkedin, Mail, Instagram, Heart } from 'lucide-react';
-import { playCyberClick } from '../utils/audio';
+import { Shield, Github, Linkedin, Mail, Instagram } from 'lucide-react';
 
 interface FooterProps {
-  onTriggerRoot: () => void;
+  onTriggerRoot?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onTriggerRoot }) => {
+export const Footer: React.FC<FooterProps> = () => {
   return (
     <footer className="relative bg-[#030604]/80 backdrop-blur-sm border-t border-emerald-950/80 pt-16 pb-12 px-4 sm:px-6 lg:px-8 font-mono text-emerald-500 overflow-hidden">
       <div className="relative z-10 max-w-7xl mx-auto">
@@ -101,16 +100,6 @@ export const Footer: React.FC<FooterProps> = ({ onTriggerRoot }) => {
 
           <div className="flex items-center gap-4 text-[11px]">
             <span className="text-emerald-700">KERNEL // v2.6.4</span>
-            <button
-              onClick={() => {
-                playCyberClick();
-                onTriggerRoot();
-              }}
-              title="Secret Backdoor"
-              className="text-emerald-700 hover:text-emerald-400 transition-colors cursor-pointer"
-            >
-              [ ROOT GATEWAY ]
-            </button>
           </div>
         </div>
       </div>
