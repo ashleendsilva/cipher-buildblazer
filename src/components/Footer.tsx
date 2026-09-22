@@ -8,10 +8,7 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onTriggerRoot }) => {
   return (
-    <footer className="relative bg-[#030604] border-t border-emerald-950/80 pt-16 pb-12 px-4 sm:px-6 lg:px-8 font-mono text-emerald-500 overflow-hidden">
-      {/* Subtle scanline overlay */}
-      <div className="absolute inset-0 cyber-grid opacity-20 pointer-events-none" />
-
+    <footer className="relative bg-[#030604]/80 backdrop-blur-sm border-t border-emerald-950/80 pt-16 pb-12 px-4 sm:px-6 lg:px-8 font-mono text-emerald-500 overflow-hidden">
       <div className="relative z-10 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-12 border-b border-emerald-950/80">
           {/* Col 1: Brand & Department info (matches video at 00:59) */}

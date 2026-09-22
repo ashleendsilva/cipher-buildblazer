@@ -6,6 +6,8 @@ import { LeadershipSection } from './components/LeadershipSection';
 import { EventsSection } from './components/EventsSection';
 import { JoinSection } from './components/JoinSection';
 import { Footer } from './components/Footer';
+import { InteractiveMouseGrid } from './components/InteractiveMouseGrid';
+import { TopographicMeshCanvas } from './components/TopographicMeshCanvas';
 import { IntroBootloader } from './components/IntroBootloader';
 import { JoinModal } from './components/JoinModal';
 import { RootAccessModal } from './components/RootAccessModal';
@@ -68,7 +70,13 @@ export default function App() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#050806] text-emerald-100 selection:bg-emerald-500 selection:text-black font-mono overflow-x-hidden">
+    <div className="relative min-h-screen bg-[#050806] cyber-grid text-emerald-100 selection:bg-emerald-500 selection:text-black font-mono overflow-x-hidden">
+      {/* Full Page Cyber Grid with interactive node tracking, ripple distortion, and HUD coordinates */}
+      <InteractiveMouseGrid fullPage={true} />
+
+      {/* Full Page Topographic Contour Waves with multi-harmonic undulating flow and cursor gravity */}
+      <TopographicMeshCanvas fullPage={true} />
+
       {/* Intro Bootloader Terminal Animation */}
       {!booted && (
         <IntroBootloader onComplete={handleBootComplete} />

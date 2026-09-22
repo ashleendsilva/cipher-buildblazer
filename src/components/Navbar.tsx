@@ -76,11 +76,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenJoin, onReplayIntro }) => 
           }}
           className="flex items-center gap-3 group select-none"
         >
-          <div className="relative flex items-center justify-center w-12 h-12">
+          <div className="relative flex items-center justify-center w-24 h-24">
           <img
               src="/images/CSlogo.jpg"
               alt="CIPHER Logo"
-               className="w-10 h-10 object-contain group-hover:scale-110 transition-transform"
+               className="w-24 h-24 object-contain group-hover:scale-110 transition-transform"
           />
 
           <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#22c55e] animate-pulse" />

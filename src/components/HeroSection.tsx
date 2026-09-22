@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowRight, Calendar, Terminal, Shield, Activity, Cpu } from 'lucide-react';
-import { TopographicMeshCanvas } from './TopographicMeshCanvas';
-import { InteractiveMouseGrid } from './InteractiveMouseGrid';
 import { AsciiMatrixCipherHeader } from './AsciiMatrixCipherHeader';
 import { playCyberClick } from '../utils/audio';
 
@@ -40,17 +38,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenJoin, onExploreE
           ? 'radial-gradient(650px circle at var(--mouse-x, 50%) var(--mouse-y, 40%), rgba(34, 197, 94, 0.14), rgba(5, 150, 105, 0.04) 50%, transparent 80%)'
           : 'radial-gradient(600px circle at 50% 40%, rgba(34, 197, 94, 0.08), transparent 75%)',
       }}
-      className="relative min-h-screen flex flex-col justify-center items-center pt-24 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden bg-[#050806] transition-colors duration-300"
+      className="relative min-h-screen flex flex-col justify-center items-center pt-24 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden bg-transparent transition-colors duration-300"
     >
-      {/* Dynamic Interactive Mouse-Tracking Grid with Glowing Light Pulses */}
-      <InteractiveMouseGrid />
-
-      {/* Interactive Topographic Mesh Canvas */}
-      <TopographicMeshCanvas />
-
-      {/* Cyber Grid background layer with glowing highlight overlay */}
-      <div className="absolute inset-0 cyber-grid opacity-30 pointer-events-none" />
-
       {/* Dynamic Cursor Light Glow Pulse */}
       {mousePos.active && (
         <div

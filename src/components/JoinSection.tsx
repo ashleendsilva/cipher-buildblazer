@@ -16,9 +16,8 @@ export const JoinSection: React.FC<JoinSectionProps> = ({ onOpenJoin }) => {
   };
 
   return (
-    <section id="join" className="relative py-28 px-4 sm:px-6 lg:px-8 bg-[#040805] border-t border-emerald-950/80 overflow-hidden text-center font-mono">
-      {/* Background Topographic / Matrix Ambient Glow */}
-      <div className="absolute inset-0 cyber-grid opacity-25 pointer-events-none" />
+    <section id="join" className="relative py-28 px-4 sm:px-6 lg:px-8 bg-transparent border-t border-emerald-950/80 overflow-hidden text-center font-mono">
+      {/* Background Matrix Ambient Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[300px] bg-emerald-500/10 rounded-full blur-[130px] pointer-events-none" />
 
       <div className="relative z-10 max-w-4xl mx-auto flex flex-col items-center">

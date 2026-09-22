@@ -35,9 +35,10 @@ interface GridNodePulse {
 
 interface InteractiveMouseGridProps {
   onGridClickPulse?: (x: number, y: number) => void;
+  fullPage?: boolean;
 }
 
-export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = () => {
+export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = ({ fullPage = true }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -51,10 +52,10 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = () => {
     let height = 0;
 
     const resize = () => {
-      if (!canvas || !canvas.parentElement) return;
+      if (!canvas) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      width = canvas.parentElement.clientWidth;
-      height = canvas.parentElement.clientHeight;
+      width = fullPage ? window.innerWidth : (canvas.parentElement?.clientWidth || window.innerWidth);
+      height = fullPage ? window.innerHeight : (canvas.parentElement?.clientHeight || window.innerHeight);
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       ctx.resetTransform?.();
@@ -158,10 +159,15 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = () => {
     };
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (!parent) return;
-      const rect = parent.getBoundingClientRect();
-      targetMouseX = e.clientX - rect.left;
-      targetMouseY = e.clientY - rect.top;
+      if (fullPage) {
+        targetMouseX = e.clientX;
+        targetMouseY = e.clientY;
+      } else {
+        if (!parent) return;
+        const rect = parent.getBoundingClientRect();
+        targetMouseX = e.clientX - rect.left;
+        targetMouseY = e.clientY - rect.top;
+      }
       isHovered = true;
 
       // Calculate movement delta to trigger glowing pulses on significant motion
@@ -189,21 +195,33 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = () => {
     };
 
     const handleClickOrDown = (e: MouseEvent | PointerEvent) => {
-      if (!parent) return;
-      const rect = parent.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const clickY = e.clientY - rect.top;
+      let clickX = e.clientX;
+      let clickY = e.clientY;
+      if (!fullPage && parent) {
+        const rect = parent.getBoundingClientRect();
+        clickX -= rect.left;
+        clickY -= rect.top;
+      }
 
       // Launch ripple distortion effect bending the grid lines
       spawnRippleDistortion(clickX, clickY);
       spawnPulse(clickX, clickY, true);
 
-      // Audio feedback for cybernetic warp effect
-      playCyberClick();
-      playCyberWarpSweep();
+      // Audio feedback for cybernetic warp effect if not clicking an interactive UI control
+      const target = e.target as HTMLElement | null;
+      const isInteractive = target?.closest('button, a, input, textarea, select, [role="button"]');
+      if (!isInteractive) {
+        playCyberClick();
+        playCyberWarpSweep();
+      }
     };
 
-    if (parent) {
+    if (fullPage) {
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
+      window.addEventListener('mouseenter', handleMouseEnter);
+      window.addEventListener('mouseleave', handleMouseLeave);
+      window.addEventListener('pointerdown', handleClickOrDown, { passive: true });
+    } else if (parent) {
       parent.addEventListener('mousemove', handleMouseMove);
       parent.addEventListener('mouseenter', handleMouseEnter);
       parent.addEventListener('mouseleave', handleMouseLeave);
@@ -310,17 +328,18 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = () => {
           hasRipples &&
           ripples.some((rip) => Math.abs(baseY - rip.y) < rip.radius + rip.waveWidth + 10);
 
+        const isMajor = r % 4 === 0;
         if (!inRippleZone) {
           // Standard unwarped straight line for optimal performance
           ctx.beginPath();
           ctx.moveTo(0, baseY);
           ctx.lineTo(width, baseY);
           if (isNear) {
-            ctx.strokeStyle = `rgba(34, 197, 94, ${0.08 + alphaBoost * 0.24})`;
+            ctx.strokeStyle = `rgba(34, 197, 94, ${0.1 + alphaBoost * 0.28})`;
             ctx.lineWidth = 1 + alphaBoost * 0.6;
           } else {
-            ctx.strokeStyle = 'rgba(16, 185, 129, 0.06)';
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = isMajor ? 'rgba(34, 197, 94, 0.12)' : 'rgba(16, 185, 129, 0.075)';
+            ctx.lineWidth = isMajor ? 1.2 : 1;
           }
           ctx.stroke();
         } else {
@@ -341,7 +360,7 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = () => {
 
           // Dynamic line glow when physically bent
           const warpGlow = Math.min(1, maxLineWarp * 1.5);
-          ctx.strokeStyle = `rgba(74, 222, 128, ${0.1 + alphaBoost * 0.25 + warpGlow * 0.45})`;
+          ctx.strokeStyle = `rgba(74, 222, 128, ${0.12 + alphaBoost * 0.28 + warpGlow * 0.45})`;
           ctx.lineWidth = 1 + alphaBoost * 0.6 + warpGlow * 1.2;
           ctx.stroke();
         }
@@ -353,6 +372,7 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = () => {
         const distX = Math.abs(baseX - mouseX);
         const isNear = distX < 220;
         const alphaBoost = isNear ? Math.max(0, 1 - distX / 220) : 0;
+        const isMajor = c % 4 === 0;
 
         const inRippleZone =
           hasRipples &&
@@ -363,11 +383,11 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = () => {
           ctx.moveTo(baseX, 0);
           ctx.lineTo(baseX, height);
           if (isNear) {
-            ctx.strokeStyle = `rgba(34, 197, 94, ${0.08 + alphaBoost * 0.24})`;
+            ctx.strokeStyle = `rgba(34, 197, 94, ${0.1 + alphaBoost * 0.28})`;
             ctx.lineWidth = 1 + alphaBoost * 0.6;
           } else {
-            ctx.strokeStyle = 'rgba(16, 185, 129, 0.06)';
-            ctx.lineWidth = 1;
+            ctx.strokeStyle = isMajor ? 'rgba(34, 197, 94, 0.12)' : 'rgba(16, 185, 129, 0.075)';
+            ctx.lineWidth = isMajor ? 1.2 : 1;
           }
           ctx.stroke();
         } else {
@@ -577,19 +597,24 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = () => {
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('resize', resize);
-      if (parent) {
+      if (fullPage) {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseenter', handleMouseEnter);
+        window.removeEventListener('mouseleave', handleMouseLeave);
+        window.removeEventListener('pointerdown', handleClickOrDown);
+      } else if (parent) {
         parent.removeEventListener('mousemove', handleMouseMove);
         parent.removeEventListener('mouseenter', handleMouseEnter);
         parent.removeEventListener('mouseleave', handleMouseLeave);
         parent.removeEventListener('pointerdown', handleClickOrDown);
       }
     };
-  }, []);
+  }, [fullPage]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 pointer-events-none w-full h-full z-0"
+      className={`${fullPage ? 'fixed inset-0 z-0' : 'absolute inset-0 z-0'} pointer-events-none w-full h-full`}
     />
   );
 };
