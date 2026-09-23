@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Event {
+  id            String   @id @default(cuid())
+  badge         String
+  dateStr       String
+  isoDate       String
+  venue         String
+  title         String
+  theme         String?
+  shortSummary  String
+  fullNarrative String[]
+  highlights    String[]
+  galleryImages Json
+  tracks        Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model ArchiveItem {
+  id          String   @id @default(cuid())
+  num         String
+  title       String
+  category    String
+  year        String
+  description String
+  tags        String[]
+  leadSpeaker String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TeamMember {
+  id           String   @id @default(cuid())
+  name         String
+  role         String
+  subtitle     String?
+  category     String
+  image        String
+  bio          String
+  quote        String?
+  contributions String[]
+  github       String?
+  linkedin     String?
+  email        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Application {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  year      String
+  domain    String
+  message   String?
+  createdAt DateTime @default(now())
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  name      String
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
