@@ -47,11 +47,13 @@ export const IntroBootloader: React.FC<IntroBootloaderProps> = ({ onComplete }) 
   const [scrambledTitle, setScrambledTitle] = useState('------');
   const [soundOn, setSoundOn] = useState(isSoundEnabled());
   const [isAccelerated, setIsAccelerated] = useState(false);
+  const [isAccessGranted, setIsAccessGranted] = useState(false);
   const [spectrumBars, setSpectrumBars] = useState<number[]>([40, 65, 30, 85, 50, 95, 45, 75, 60, 90, 35, 70]);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const rotationRef = useRef({ x: 0.4, y: 0.6, speed: 0.015 });
+  const tapTriggeredRef = useRef(false);
 
   // Handle sound toggle
   const handleToggleSound = () => {
@@ -251,10 +253,12 @@ export const IntroBootloader: React.FC<IntroBootloaderProps> = ({ onComplete }) 
           playCyberWarpSweep();
         } else if (next >= 100) {
           clearInterval(progressTimer);
+          setIsAccessGranted(true);
+          setScrambledTitle(TARGET_WORD);
           playAccessGranted();
           setTimeout(() => {
             onComplete();
-          }, 850);
+          }, 320);
         }
 
         return next;
@@ -274,6 +278,10 @@ export const IntroBootloader: React.FC<IntroBootloaderProps> = ({ onComplete }) 
 
   // Scrambling Title Decryption
   useEffect(() => {
+    if (isAccessGranted || progress >= 100) {
+      setScrambledTitle(TARGET_WORD);
+      return;
+    }
     const letters = TARGET_WORD.split('');
     const interval = setInterval(() => {
       const resolvedCount = Math.floor((progress / 100) * letters.length);
@@ -287,14 +295,26 @@ export const IntroBootloader: React.FC<IntroBootloaderProps> = ({ onComplete }) 
     }, 70);
 
     return () => clearInterval(interval);
-  }, [progress]);
+  }, [progress, isAccessGranted]);
 
-  // Accelerate on core click
-  const handleCoreClick = () => {
-    playDataBurst();
-    setIsAccelerated(true);
-    rotationRef.current.speed = 0.05;
-    setProgress((p) => Math.min(p + 16, 99));
+  // Launch on cube click/tap with instant "ACCESS GRANTED" visual response
+  const handleCoreClick = (e?: React.MouseEvent | React.TouchEvent) => {
+    if (e) {
+      e.stopPropagation();
+    }
+    if (tapTriggeredRef.current) return;
+    tapTriggeredRef.current = true;
+    setIsAccessGranted(true);
+    setProgress(100);
+    setScrambledTitle(TARGET_WORD);
+    setPhase('warp');
+    rotationRef.current.speed = 0.08;
+    playAccessGranted();
+
+    // Fast, crisp confirmation display of "ACCESS GRANTED" (320ms) before transitioning to website content
+    setTimeout(() => {
+      onComplete();
+    }, 320);
   };
 
   const handleSkip = () => {
@@ -305,8 +325,8 @@ export const IntroBootloader: React.FC<IntroBootloaderProps> = ({ onComplete }) 
   return (
     <motion.div
       initial={{ opacity: 1 }}
-      exit={{ opacity: 0, scale: 1.05, filter: 'blur(8px)' }}
-      transition={{ duration: 0.7 }}
+      exit={{ opacity: 0, scale: 1.02 }}
+      transition={{ duration: 0.18 }}
       className="fixed inset-0 z-50 flex flex-col items-center justify-between bg-[#020503] text-emerald-400 font-mono select-none overflow-hidden p-4 sm:p-8"
     >
       {/* Background Matrix Rain Animation */}
@@ -358,18 +378,32 @@ export const IntroBootloader: React.FC<IntroBootloaderProps> = ({ onComplete }) 
         {/* Holographic Wireframe Core & Radar Canvas */}
         <div
           onClick={handleCoreClick}
-          title="Click to Accelerate Kernel Initialization"
-          className="relative cursor-pointer group flex items-center justify-center my-2"
+          onTouchStart={handleCoreClick}
+          title="Tap Cube to Instantly Enter Website"
+          className="relative cursor-pointer group flex items-center justify-center my-2 active:scale-95 transition-transform"
         >
           <canvas
             ref={canvasRef}
-            className="w-[240px] h-[240px] sm:w-[280px] sm:h-[280px] drop-shadow-[0_0_25px_rgba(34,197,94,0.35)] transition-transform duration-300 group-hover:scale-105"
+            className="w-[240px] h-[240px] sm:w-[280px] sm:h-[280px] drop-shadow-[0_0_25px_rgba(34,197,94,0.35)] transition-transform duration-200 group-hover:scale-105"
           />
 
           {/* Interactive touch badge */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <span className="text-[10px] tracking-widest text-emerald-400/80 bg-black/60 px-2 py-0.5 rounded border border-emerald-900 group-hover:border-emerald-400 transition-colors">
-              {progress >= 100 ? 'ACCESS GRANTED' : isAccelerated ? 'BOOSTING...' : '[ CLICK TO BOOST ]'}
+            <span
+              className={`text-[10px] sm:text-xs tracking-widest font-bold px-3 py-1 rounded transition-all duration-150 flex items-center gap-1.5 ${
+                isAccessGranted || progress >= 100
+                  ? 'bg-[#031508]/95 text-[#00ff41] border border-[#00ff41] shadow-[0_0_25px_#00ff41] scale-110'
+                  : 'bg-black/85 text-emerald-300 border border-emerald-500/80 shadow-[0_0_15px_rgba(34,197,94,0.5)] group-hover:border-emerald-300 group-hover:scale-105'
+              }`}
+            >
+              {isAccessGranted || progress >= 100 ? (
+                <>
+                  <span className="w-2 h-2 rounded-full bg-[#00ff41] animate-ping" />
+                  <span>ACCESS GRANTED</span>
+                </>
+              ) : (
+                <span>[ TAP CUBE TO ENTER ]</span>
+              )}
             </span>
           </div>
         </div>
@@ -378,7 +412,7 @@ export const IntroBootloader: React.FC<IntroBootloaderProps> = ({ onComplete }) 
         <div className="relative mt-2">
           <div
             className={`text-5xl sm:text-7xl md:text-8xl font-black tracking-widest text-white drop-shadow-[0_0_35px_rgba(34,197,94,0.7)] ${
-              phase === 'warp' ? 'animate-glitch-rgb text-emerald-300' : ''
+              phase === 'warp' || isAccessGranted ? 'animate-glitch-rgb text-emerald-300' : ''
             }`}
           >
             {scrambledTitle}
@@ -397,7 +431,13 @@ export const IntroBootloader: React.FC<IntroBootloaderProps> = ({ onComplete }) 
           <div className="flex items-center justify-between text-xs text-emerald-400">
             <span className="flex items-center gap-1.5 font-bold">
               <Zap className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-              <span>{phase === 'warp' ? 'CONVERGENCE ACHIEVED' : 'INITIALIZING KERNEL'}</span>
+              <span>
+                {isAccessGranted || progress >= 100
+                  ? 'ACCESS GRANTED'
+                  : phase === 'warp'
+                  ? 'CONVERGENCE ACHIEVED'
+                  : 'INITIALIZING KERNEL'}
+              </span>
             </span>
             <span className="text-emerald-300 font-bold text-sm">{Math.floor(progress)}%</span>
           </div>

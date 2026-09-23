@@ -4,7 +4,7 @@ import { AnnouncementBanner } from './AnnouncementBanner';
 import { isSoundEnabled, toggleSound, playCyberClick } from '../utils/audio';
 
 // Static asset path for files in your public/images/ directory
-const CSlogo = '/images/CSlogo.jpg';
+const CSlogo = '/images/cipher-logo.webp';
 
 interface NavbarProps {
   onOpenJoin: () => void;
@@ -89,14 +89,13 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenJoin, onReplayIntro }) => 
           }}
           className="flex items-center gap-3 group cursor-pointer"
         >
-          <div className="relative w-15 h-10 full bg-[#030604] ">
-            <img
-              src={CSlogo}
-              alt="CIPHER Emblem Logo"
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-            />
-            
-          </div>
+          <div className="relative w-24 h-14 flex items-center justify-center bg-transparent overflow-hidden">
+  <img
+    src={CSlogo}
+    alt="CIPHER Emblem Logo"
+    className="w-full h-full object-contain mix-blend-screen transition-transform duration-300 group-hover:scale-110"
+  />
+</div>
 
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
