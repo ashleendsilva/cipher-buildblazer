@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Volume2, VolumeX, Menu, X, Sparkles } from 'lucide-react';
+import { AnnouncementBanner } from './AnnouncementBanner';
 import { isSoundEnabled, toggleSound, playCyberClick } from '../utils/audio';
+
+// Static asset path for files in your public/images/ directory
+const CSlogo = '/images/CSlogo.jpg';
 
 interface NavbarProps {
   onOpenJoin: () => void;
   onReplayIntro?: () => void;
+  onOpenAdmin?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenJoin, onReplayIntro }) => {
@@ -60,42 +65,49 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenJoin, onReplayIntro }) => 
 
   return (
     <header
+      id="main-site-header"
       className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 font-mono ${
         scrolled
-          ? 'bg-[#050806]/90 backdrop-blur-md border-b border-emerald-950/80 shadow-lg shadow-black/40 py-3'
-          : 'bg-transparent py-5'
+          ? 'bg-[#050806]/95 backdrop-blur-md border-b border-emerald-950/80 shadow-lg shadow-black/50'
+          : 'bg-[#050806]/85 backdrop-blur-sm border-b border-emerald-950/40'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        {/* Left: CIPHER Logo Badge with wings */}
+      {/* Real-time Campus Broadcast Notification Banner */}
+      <AnnouncementBanner onOpenJoin={onOpenJoin} />
+
+      <div
+        className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-all duration-300 ${
+          scrolled ? 'py-2.5' : 'py-3.5'
+        }`}
+      >
+        {/* Brand / Logo */}
         <a
           href="#home"
           onClick={(e) => {
             e.preventDefault();
             handleNavClick('#home');
           }}
-          className="flex items-center gap-3 group select-none"
+          className="flex items-center gap-3 group cursor-pointer"
         >
-          <div className="relative flex items-center justify-center w-24 h-24">
-          <img
-              src="/images/CSlogo.jpg"
-              alt="CIPHER Logo"
-               className="w-24 h-24 object-contain group-hover:scale-110 transition-transform"
-          />
-
-          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#22c55e] animate-pulse" />
+          <div className="relative w-15 h-10 full bg-[#030604] ">
+            <img
+              src={CSlogo}
+              alt="CIPHER Emblem Logo"
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            />
+            
           </div>
 
           <div className="flex flex-col">
-            <span className="font-extrabold tracking-widest text-lg text-emerald-300 text-glow-sm flex items-center gap-1.5">
-              CIPHER
-              <span className="text-[10px] font-normal px-1.5 py-0.2 bg-emerald-950/80 border border-emerald-800/60 rounded text-emerald-400">
-                CSE
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold text-base tracking-widest text-emerald-400 group-hover:text-emerald-300 transition-colors">
+                CIPHER
               </span>
-            </span>
-            <span className="text-[9px] uppercase tracking-wider text-emerald-600/90 font-mono hidden sm:block">
-              St Joseph Engg College
-            </span>
+              <span className="text-[10px] px-1.5 py-0.5 bg-emerald-950/80 border border-emerald-800 text-emerald-300 rounded font-semibold tracking-wider">
+                SJEC
+              </span>
+            </div>
+           
           </div>
         </a>
 
@@ -111,7 +123,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenJoin, onReplayIntro }) => 
                   e.preventDefault();
                   handleNavClick(link.href);
                 }}
-                className={`relative px-3 py-1.5 text-xs font-semibold tracking-wider rounded transition-all duration-200 ${
+                className={`relative px-3 py-1.5 text-xs font-semibold tracking-wider rounded transition-all duration-200 cursor-pointer ${
                   isActive
                     ? 'text-emerald-300 bg-emerald-950/60 border border-emerald-800/60 shadow-[0_0_10px_rgba(34,197,94,0.2)]'
                     : 'text-emerald-500/80 hover:text-emerald-300 hover:bg-emerald-950/30'
@@ -127,12 +139,12 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenJoin, onReplayIntro }) => 
         </nav>
 
         {/* Right Actions */}
-        <div className="hidden lg:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2 lg:gap-3">
           {/* Audio toggle button */}
           <button
             onClick={handleSoundToggle}
             title={soundOn ? 'Mute Cyber Audio' : 'Unmute Cyber Audio'}
-            className="p-2 text-emerald-500/70 hover:text-emerald-300 border border-emerald-900/50 hover:border-emerald-700 bg-[#060b08]/80 rounded transition-all"
+            className="p-2 text-emerald-500/70 hover:text-emerald-300 border border-emerald-900/50 hover:border-emerald-700 bg-[#060b08]/80 rounded transition-all cursor-pointer"
           >
             {soundOn ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-emerald-700" />}
           </button>
@@ -145,33 +157,34 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenJoin, onReplayIntro }) => 
                 onReplayIntro();
               }}
               title="Replay Terminal Bootloader Intro"
-              className="p-2 text-emerald-500/70 hover:text-emerald-300 border border-emerald-900/50 hover:border-emerald-700 bg-[#060b08]/80 rounded transition-all"
+              className="p-2 text-emerald-500/70 hover:text-emerald-300 border border-emerald-900/50 hover:border-emerald-700 bg-[#060b08]/80 rounded transition-all cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5" />
             </button>
           )}
 
-          {/* Join Cipher CTA (matching video style) */}
+          {/* Join Cipher CTA */}
           <button
             id="nav-join-cipher-btn"
             onClick={() => {
               playCyberClick();
               onOpenJoin();
             }}
-            className="px-4 py-1.5 text-xs font-bold tracking-wider uppercase text-emerald-300 bg-emerald-950/60 hover:bg-emerald-800/50 border border-emerald-600/80 hover:border-emerald-400 rounded transition-all duration-200 shadow-[0_0_12px_rgba(34,197,94,0.25)] hover:shadow-[0_0_18px_rgba(34,197,94,0.5)] active:scale-95"
+            className="px-4 py-1.5 text-xs font-bold tracking-wider uppercase text-emerald-300 bg-emerald-950/60 hover:bg-emerald-800/50 border border-emerald-600/80 hover:border-emerald-400 rounded transition-all duration-200 shadow-[0_0_12px_rgba(34,197,94,0.25)] hover:shadow-[0_0_18px_rgba(34,197,94,0.5)] active:scale-95 cursor-pointer"
           >
             JOIN CIPHER
           </button>
         </div>
 
-        {/* Mobile menu & quick buttons */}
+        {/* Mobile menu */}
         <div className="flex md:hidden items-center gap-2">
           <button
             onClick={() => {
               playCyberClick();
               setMobileMenuOpen(!mobileMenuOpen);
             }}
-            className="p-2 text-emerald-400 border border-emerald-900 bg-[#060b08] rounded"
+            className="p-2 text-emerald-400 border border-emerald-900 bg-[#060b08] rounded cursor-pointer"
+            aria-label="Toggle Navigation Menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -204,7 +217,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenJoin, onReplayIntro }) => 
           <div className="pt-4 border-t border-emerald-950/80 flex items-center justify-between gap-3">
             <button
               onClick={handleSoundToggle}
-              className="flex items-center gap-2 px-3 py-2 text-xs border border-emerald-900 rounded text-emerald-400"
+              className="flex items-center gap-2 px-3 py-2 text-xs border border-emerald-900 rounded text-emerald-400 cursor-pointer"
             >
               {soundOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               <span>{soundOn ? 'Sound On' : 'Sound Off'}</span>
@@ -216,7 +229,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenJoin, onReplayIntro }) => 
                 setMobileMenuOpen(false);
                 onOpenJoin();
               }}
-              className="flex-1 py-2 text-xs font-bold uppercase tracking-wider text-black bg-emerald-500 hover:bg-emerald-400 rounded text-center"
+              className="flex-1 py-2 text-xs font-bold uppercase tracking-wider text-black bg-emerald-500 hover:bg-emerald-400 rounded text-center cursor-pointer"
             >
               JOIN CIPHER
             </button>
@@ -226,3 +239,5 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenJoin, onReplayIntro }) => 
     </header>
   );
 };
+
+export default Navbar;

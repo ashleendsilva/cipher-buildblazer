@@ -58,19 +58,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onOpenJoin, onExploreE
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col items-center text-center">
-        {/* Node status badge */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 mb-8 rounded-full border border-emerald-800/60 bg-[#07130b]/80 backdrop-blur-md text-xs font-mono text-emerald-400/90 shadow-[0_0_15px_rgba(34,197,94,0.15)]">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#22c55e]" />
-          <span className="font-semibold">NODE: SJEC.CSE.CIPHER</span>
-          <span className="text-emerald-700">|</span>
-          <span className="hidden sm:inline text-emerald-500/80">TERM 2025–2026</span>
-          <span className="text-emerald-700 hidden sm:inline">|</span>
-          <span className="text-emerald-300 font-mono text-[11px]">SYS // ONLINE</span>
-          <span className="text-emerald-700 hidden md:inline">|</span>
-          <span className="hidden md:inline-flex items-center gap-1 text-[10px] text-emerald-400 font-mono bg-emerald-950/60 border border-emerald-800/80 px-2 py-0.5 rounded-full">
-            CLICK TO WARP GRID
-          </span>
-        </div>
+       
 
         {/* ASCII Matrix Glyph Typography & Vertical Contour Waves: CIPHER */}
         <AsciiMatrixCipherHeader />
