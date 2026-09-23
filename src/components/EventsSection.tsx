@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, type Variants } from 'motion/react';
 import {
-  Calendar,
   MapPin,
   ChevronLeft,
   ChevronRight,
@@ -22,7 +21,8 @@ interface ActivityItem {
   category: string;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const EventsSection: React.FC = () => {
   const [events, setEvents] = useState<EventItem[]>([]);
@@ -57,21 +57,36 @@ export const EventsSection: React.FC = () => {
         setEvents(eventsData);
         setActivities(activitiesData);
       } catch (error) {
-        console.error('Failed to load events and activities:', error);
+        console.error(
+          'Failed to load events and activities:',
+          error
+        );
       }
     };
 
     fetchContent();
   }, []);
 
-  const headingText = useScrambleText('Events & Workshops', true, 750, 12);
-  const archiveHeadingText = useScrambleText('Activities', true, 700, 10);
+  const headingText = useScrambleText(
+    'Events & Workshops',
+    true,
+    750,
+    12
+  );
+
+  const archiveHeadingText = useScrambleText(
+    'Activities',
+    true,
+    700,
+    10
+  );
 
   const filteredActivities = activities.filter((activity) => {
     const query = searchQuery.trim().toLowerCase();
 
     const matchesCategory =
-      selectedCategory === 'ALL' || activity.category === selectedCategory;
+      selectedCategory === 'ALL' ||
+      activity.category === selectedCategory;
 
     const matchesSearch =
       query === '' ||
@@ -82,32 +97,49 @@ export const EventsSection: React.FC = () => {
   });
 
   // Event Gallery Modal State
-  const [activeModalEvent, setActiveModalEvent] = useState<EventItem | null>(null);
+  const [activeModalEvent, setActiveModalEvent] =
+    useState<EventItem | null>(null);
+
   const [currentPhotoIdx, setCurrentPhotoIdx] = useState(0);
 
   // Fun Image Changing Effect State
   const [funEffect, setFunEffect] = useState<
     'bounce' | 'flip' | 'glitch' | 'zoom' | 'slide' | 'spin'
   >('bounce');
+
   const [funKey, setFunKey] = useState(0);
+
   const [particles, setParticles] = useState<
     { id: number; x: number; y: number; label: string }[]
   >([]);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [touchStartY, setTouchStartY] = useState<number | null>(null);
+
+  const [touchStartX, setTouchStartX] =
+    useState<number | null>(null);
+
+  const [touchStartY, setTouchStartY] =
+    useState<number | null>(null);
+
   const [isSwiped, setIsSwiped] = useState(false);
 
   const funVariants: Variants = {
     bounce: {
       scale: [0.88, 1.08, 0.98, 1],
       rotate: [0, -3, 3, 0],
-      transition: { duration: 0.45, ease: 'easeOut' },
+      transition: {
+        duration: 0.45,
+        ease: 'easeOut',
+      },
     },
+
     flip: {
       rotateY: [0, 90, 0],
       scale: [1, 0.9, 1],
-      transition: { duration: 0.5, ease: 'easeInOut' },
+      transition: {
+        duration: 0.5,
+        ease: 'easeInOut',
+      },
     },
+
     glitch: {
       x: [0, -10, 10, -5, 5, 0],
       y: [0, 3, -3, 2, 0],
@@ -117,21 +149,36 @@ export const EventsSection: React.FC = () => {
         'hue-rotate(-45deg) contrast(125%)',
         'hue-rotate(0deg) contrast(100%)',
       ],
-      transition: { duration: 0.4, ease: 'easeInOut' },
+      transition: {
+        duration: 0.4,
+        ease: 'easeInOut',
+      },
     },
+
     zoom: {
       scale: [1.2, 0.96, 1],
-      transition: { duration: 0.4, ease: 'easeOut' },
+      transition: {
+        duration: 0.4,
+        ease: 'easeOut',
+      },
     },
+
     slide: {
       x: [50, -6, 0],
       opacity: [0.4, 1, 1],
-      transition: { duration: 0.35, ease: 'easeOut' },
+      transition: {
+        duration: 0.35,
+        ease: 'easeOut',
+      },
     },
+
     spin: {
       rotate: [0, -18, 12, 0],
       scale: [0.92, 1.05, 1],
-      transition: { duration: 0.45, ease: 'easeOut' },
+      transition: {
+        duration: 0.45,
+        ease: 'easeOut',
+      },
     },
   };
 
@@ -147,11 +194,18 @@ export const EventsSection: React.FC = () => {
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+
+    return () =>
+      window.removeEventListener('keydown', handleKeyDown);
   }, [activeModalEvent]);
 
   const openGallery = (event: EventItem) => {
+    if (!event.galleryImages || event.galleryImages.length === 0) {
+      return;
+    }
+
     playCyberClick();
+
     setActiveModalEvent(event);
     setCurrentPhotoIdx(0);
     setParticles([]);
@@ -159,17 +213,31 @@ export const EventsSection: React.FC = () => {
   };
 
   const nextPhoto = () => {
-    if (!activeModalEvent) return;
+    if (
+      !activeModalEvent ||
+      !activeModalEvent.galleryImages ||
+      activeModalEvent.galleryImages.length === 0
+    ) {
+      return;
+    }
 
     playCyberClick();
 
     setCurrentPhotoIdx(
-      (prev) => (prev + 1) % activeModalEvent.galleryImages.length
+      (prev) =>
+        (prev + 1) %
+        activeModalEvent.galleryImages.length
     );
   };
 
   const prevPhoto = () => {
-    if (!activeModalEvent) return;
+    if (
+      !activeModalEvent ||
+      !activeModalEvent.galleryImages ||
+      activeModalEvent.galleryImages.length === 0
+    ) {
+      return;
+    }
 
     playCyberClick();
 
@@ -180,15 +248,28 @@ export const EventsSection: React.FC = () => {
     );
   };
 
-  const triggerFunChange = (e?: React.MouseEvent<HTMLDivElement>) => {
+  const triggerFunChange = (
+    e?: React.MouseEvent<HTMLDivElement>
+  ) => {
     if (isSwiped) {
       setIsSwiped(false);
       return;
     }
 
+    if (
+      !activeModalEvent ||
+      !activeModalEvent.galleryImages ||
+      activeModalEvent.galleryImages.length === 0
+    ) {
+      return;
+    }
+
     playCyberClick();
 
-    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+    if (
+      typeof navigator !== 'undefined' &&
+      navigator.vibrate
+    ) {
       try {
         navigator.vibrate(30);
       } catch {
@@ -203,7 +284,14 @@ export const EventsSection: React.FC = () => {
       | 'zoom'
       | 'slide'
       | 'spin'
-    )[] = ['bounce', 'flip', 'glitch', 'zoom', 'slide', 'spin'];
+    )[] = [
+      'bounce',
+      'flip',
+      'glitch',
+      'zoom',
+      'slide',
+      'spin',
+    ];
 
     const nextEffect =
       effects[Math.floor(Math.random() * effects.length)];
@@ -211,8 +299,9 @@ export const EventsSection: React.FC = () => {
     setFunEffect(nextEffect);
     setFunKey((k) => k + 1);
 
-    if (e && activeModalEvent) {
+    if (e) {
       const rect = e.currentTarget.getBoundingClientRect();
+
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
@@ -233,42 +322,69 @@ export const EventsSection: React.FC = () => {
 
       setParticles((prev) => [
         ...prev.slice(-5),
-        { id, x, y, label: randomLabel },
+        {
+          id,
+          x,
+          y,
+          label: randomLabel,
+        },
       ]);
 
       setTimeout(() => {
-        setParticles((prev) => prev.filter((p) => p.id !== id));
+        setParticles((prev) =>
+          prev.filter((p) => p.id !== id)
+        );
       }, 850);
     }
 
-    if (activeModalEvent) {
-      setCurrentPhotoIdx(
-        (prev) => (prev + 1) % activeModalEvent.galleryImages.length
-      );
-    }
+    setCurrentPhotoIdx(
+      (prev) =>
+        (prev + 1) %
+        activeModalEvent.galleryImages.length
+    );
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const handleTouchStart = (
+    e: React.TouchEvent
+  ) => {
     setTouchStartX(e.touches[0].clientX);
     setTouchStartY(e.touches[0].clientY);
     setIsSwiped(false);
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (touchStartX === null || touchStartY === null) return;
+  const handleTouchMove = (
+    e: React.TouchEvent
+  ) => {
+    if (
+      touchStartX === null ||
+      touchStartY === null
+    ) {
+      return;
+    }
 
-    const diffX = Math.abs(e.touches[0].clientX - touchStartX);
-    const diffY = Math.abs(e.touches[0].clientY - touchStartY);
+    const diffX = Math.abs(
+      e.touches[0].clientX - touchStartX
+    );
+
+    const diffY = Math.abs(
+      e.touches[0].clientY - touchStartY
+    );
 
     if (diffX > 15 && diffX > diffY) {
       setIsSwiped(true);
     }
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX === null) return;
+  const handleTouchEnd = (
+    e: React.TouchEvent
+  ) => {
+    if (touchStartX === null) {
+      return;
+    }
 
-    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndX =
+      e.changedTouches[0].clientX;
+
     const diff = touchStartX - touchEndX;
 
     if (Math.abs(diff) > 40) {
@@ -293,7 +409,10 @@ export const EventsSection: React.FC = () => {
         {/* FLAGSHIP EVENTS */}
         <div className="mb-14">
           <div className="text-xs font-mono tracking-widest text-emerald-500 uppercase flex items-center gap-2">
-            <span className="text-emerald-400 font-bold">//</span>
+            <span className="text-emerald-400 font-bold">
+              //
+            </span>
+
             <span>FLAGSHIP INITIATIVES</span>
           </div>
 
@@ -302,8 +421,9 @@ export const EventsSection: React.FC = () => {
           </h2>
 
           <p className="mt-2 text-sm text-emerald-400/80 font-sans max-w-xl">
-            Signature summits, department galas, competitive hackathons, and AI
-            tool showcases orchestrated by CIPHER.
+            Signature summits, department galas, competitive
+            hackathons, and AI tool showcases orchestrated by
+            CIPHER.
           </p>
         </div>
 
@@ -363,6 +483,7 @@ export const EventsSection: React.FC = () => {
                   className="text-xs font-bold uppercase tracking-wider text-emerald-400 hover:text-emerald-200 flex items-center gap-1.5 transition-colors group-hover:underline"
                 >
                   <span>VIEW GALLERY</span>
+
                   <ChevronRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
                 </button>
 
@@ -375,14 +496,20 @@ export const EventsSection: React.FC = () => {
         </div>
 
         {/* ARCHIVE ANCHOR */}
-        <div id="archive" className="relative -top-24" />
+        <div
+          id="archive"
+          className="relative -top-24"
+        />
 
         {/* ACTIVITIES */}
         <div className="mt-28 pt-20 border-t border-emerald-950/70">
           {/* Header */}
           <div className="mb-10">
             <div className="text-xs font-mono tracking-widest text-emerald-500 uppercase flex items-center gap-2">
-              <span className="text-emerald-400 font-bold">//</span>
+              <span className="text-emerald-400 font-bold">
+                //
+              </span>
+
               <span>ARCHIVE</span>
             </div>
 
@@ -395,9 +522,10 @@ export const EventsSection: React.FC = () => {
             </h3>
 
             <p className="mt-2 text-sm text-emerald-400/80 font-sans max-w-2xl leading-relaxed">
-              Hands-on workshops, industrial visits, and technical sessions run
-              by the Cipher Association — spanning AI, blockchain, research
-              tooling, and career prep.
+              Hands-on workshops, industrial visits, and
+              technical sessions run by the Cipher Association —
+              spanning AI, blockchain, research tooling, and
+              career prep.
             </p>
           </div>
 
@@ -410,7 +538,9 @@ export const EventsSection: React.FC = () => {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) =>
+                  setSearchQuery(e.target.value)
+                }
                 placeholder="SEARCH ACTIVITIES..."
                 aria-label="Search activities"
                 className="w-full h-[52px] pl-11 pr-4 bg-[#06100a] border border-emerald-900/70 rounded-lg text-sm text-emerald-100 placeholder:text-emerald-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 font-mono tracking-wide transition-all"
@@ -471,6 +601,7 @@ export const EventsSection: React.FC = () => {
                     <h4 className="text-sm font-semibold text-emerald-100 group-hover:text-emerald-300 transition-colors">
                       {activity.name}
                     </h4>
+
                     <span className="inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-800/80 text-emerald-500">
                       {activity.category}
                     </span>
@@ -491,11 +622,12 @@ export const EventsSection: React.FC = () => {
             </div>
           )}
 
-          {activities.length > 0 && filteredActivities.length === 0 && (
-            <div className="text-center py-12 text-emerald-600 font-mono text-xs">
-              &gt; NO ACTIVITIES MATCH YOUR FILTER
-            </div>
-          )}
+          {activities.length > 0 &&
+            filteredActivities.length === 0 && (
+              <div className="text-center py-12 text-emerald-600 font-mono text-xs">
+                &gt; NO ACTIVITIES MATCH YOUR FILTER
+              </div>
+            )}
         </div>
       </div>
 
@@ -512,16 +644,28 @@ export const EventsSection: React.FC = () => {
             className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 sm:p-5 lg:p-8 bg-black/92 backdrop-blur-md overflow-y-auto"
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
+              initial={{
+                scale: 0.95,
+                opacity: 0,
+              }}
+              animate={{
+                scale: 1,
+                opacity: 1,
+              }}
+              exit={{
+                scale: 0.95,
+                opacity: 0,
+              }}
               className="relative max-w-5xl w-full my-auto max-h-[94vh] flex flex-col bg-[#040805] border border-emerald-500/80 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.9)] font-mono text-emerald-100 overflow-hidden"
             >
               {/* Header */}
               <div className="flex items-center justify-between px-4 sm:px-6 py-3 border-b border-emerald-900/80 bg-[#061009] shrink-0 z-30">
                 <div className="flex items-center gap-2 text-[11px] sm:text-xs font-mono tracking-widest text-emerald-400 uppercase">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>CIPHER // ACTIVITIES</span>
+
+                  <span>
+                    CIPHER // ACTIVITIES
+                  </span>
                 </div>
 
                 <button
@@ -546,9 +690,17 @@ export const EventsSection: React.FC = () => {
                   </h2>
 
                   <div className="text-xs font-mono tracking-wider text-emerald-400 font-semibold uppercase mt-1.5 flex flex-wrap items-center gap-2">
-                    <span>{activeModalEvent.dateStr}</span>
-                    <span className="text-emerald-600 font-bold">·</span>
-                    <span>{activeModalEvent.venue.toUpperCase()}</span>
+                    <span>
+                      {activeModalEvent.dateStr}
+                    </span>
+
+                    <span className="text-emerald-600 font-bold">
+                      ·
+                    </span>
+
+                    <span>
+                      {activeModalEvent.venue.toUpperCase()}
+                    </span>
                   </div>
                 </div>
 
@@ -563,34 +715,58 @@ export const EventsSection: React.FC = () => {
                       </h2>
 
                       <div className="text-xs sm:text-sm font-mono tracking-wider text-emerald-400 font-semibold uppercase mt-1 mb-6 flex items-center gap-2">
-                        <span>{activeModalEvent.dateStr}</span>
-                        <span className="text-emerald-600 font-bold">·</span>
-                        <span>{activeModalEvent.venue.toUpperCase()}</span>
+                        <span>
+                          {activeModalEvent.dateStr}
+                        </span>
+
+                        <span className="text-emerald-600 font-bold">
+                          ·
+                        </span>
+
+                        <span>
+                          {activeModalEvent.venue.toUpperCase()}
+                        </span>
                       </div>
                     </div>
 
                     <div className="space-y-3 sm:space-y-4 text-xs sm:text-sm text-emerald-300/90 font-mono leading-relaxed">
-                      {activeModalEvent.fullNarrative.map((p, idx) => (
-                        <p key={idx} className="leading-relaxed">
-                          {p}
-                        </p>
-                      ))}
+                      {activeModalEvent.fullNarrative.map(
+                        (p, idx) => (
+                          <p
+                            key={idx}
+                            className="leading-relaxed"
+                          >
+                            {p}
+                          </p>
+                        )
+                      )}
                     </div>
 
                     {activeModalEvent.highlights && (
                       <div className="pt-4 border-t border-emerald-950/80 mt-6">
                         <div className="text-xs uppercase text-emerald-400 font-bold mb-2.5 flex items-center gap-1.5 font-mono">
                           <Trophy className="w-3.5 h-3.5" />
-                          <span>Highlights &amp; Milestones:</span>
+
+                          <span>
+                            Highlights &amp; Milestones:
+                          </span>
                         </div>
 
                         <ul className="space-y-1.5 text-xs text-emerald-400/80 font-sans">
-                          {activeModalEvent.highlights.map((h, i) => (
-                            <li key={i} className="flex items-start gap-2">
-                              <span className="text-emerald-500">▹</span>
-                              <span>{h}</span>
-                            </li>
-                          ))}
+                          {activeModalEvent.highlights.map(
+                            (h, i) => (
+                              <li
+                                key={i}
+                                className="flex items-start gap-2"
+                              >
+                                <span className="text-emerald-500">
+                                  ▹
+                                </span>
+
+                                <span>{h}</span>
+                              </li>
+                            )
+                          )}
                         </ul>
                       </div>
                     )}
@@ -605,7 +781,10 @@ export const EventsSection: React.FC = () => {
                         className="w-full py-2.5 rounded-lg bg-emerald-950/80 border border-emerald-600/80 text-emerald-300 hover:bg-emerald-900 font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
                       >
                         <X className="w-4 h-4" />
-                        <span>RETURN TO OVERVIEW</span>
+
+                        <span>
+                          RETURN TO OVERVIEW
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -617,13 +796,19 @@ export const EventsSection: React.FC = () => {
                       {/* Image Card Header */}
                       <div className="flex items-center justify-between px-3.5 py-2 sm:px-4 sm:py-2.5 bg-[#061009] border-b border-emerald-900/70 font-mono text-[11px] sm:text-xs text-emerald-400 font-bold">
                         <span className="tracking-wide truncate max-w-[200px]">
-                          {activeModalEvent.galleryImages[currentPhotoIdx]?.tag ||
-                            'LUMIERE_GALA'}
+                          {activeModalEvent.galleryImages[
+                            currentPhotoIdx
+                          ]?.tag || 'LUMIERE_GALA'}
                         </span>
 
                         <span className="text-emerald-300 shrink-0">
-                          {String(currentPhotoIdx + 1).padStart(2, '0')} /{' '}
-                          {String(activeModalEvent.galleryImages.length).padStart(2, '0')}
+                          {String(
+                            currentPhotoIdx + 1
+                          ).padStart(2, '0')}{' '}
+                          /{' '}
+                          {String(
+                            activeModalEvent.galleryImages.length
+                          ).padStart(2, '0')}
                         </span>
                       </div>
 
@@ -640,9 +825,18 @@ export const EventsSection: React.FC = () => {
                         <AnimatePresence>
                           <motion.div
                             key={`scanline-${funKey}`}
-                            initial={{ top: '-10%', opacity: 0.9 }}
-                            animate={{ top: '110%', opacity: 0 }}
-                            transition={{ duration: 0.5, ease: 'linear' }}
+                            initial={{
+                              top: '-10%',
+                              opacity: 0.9,
+                            }}
+                            animate={{
+                              top: '110%',
+                              opacity: 0,
+                            }}
+                            transition={{
+                              duration: 0.5,
+                              ease: 'linear',
+                            }}
                             className="absolute left-0 right-0 h-1.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_15px_#22c55e] z-30 pointer-events-none"
                           />
                         </AnimatePresence>
@@ -663,7 +857,9 @@ export const EventsSection: React.FC = () => {
                                 scale: 1.15,
                                 opacity: 0,
                               }}
-                              exit={{ opacity: 0 }}
+                              exit={{
+                                opacity: 0,
+                              }}
                               transition={{
                                 duration: 0.8,
                                 ease: 'easeOut',
@@ -678,7 +874,10 @@ export const EventsSection: React.FC = () => {
                         {/* Tooltip */}
                         <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/85 border border-emerald-500/80 text-[9px] sm:text-[10px] text-emerald-300 font-mono flex items-center gap-1 opacity-90 sm:opacity-80 group-hover:opacity-100 group-hover:border-emerald-300 group-hover:scale-105 transition-all shadow-md pointer-events-none">
                           <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-400 animate-pulse" />
-                          <span>TAP TO SHUFFLE</span>
+
+                          <span>
+                            TAP TO SHUFFLE
+                          </span>
                         </div>
 
                         {/* Animated Image */}
@@ -686,20 +885,31 @@ export const EventsSection: React.FC = () => {
                           <motion.img
                             key={`${currentPhotoIdx}-${funKey}`}
                             src={
-                              activeModalEvent.galleryImages[currentPhotoIdx]?.url
+                              activeModalEvent.galleryImages[
+                                currentPhotoIdx
+                              ]?.url
                             }
                             alt={
-                              activeModalEvent.galleryImages[currentPhotoIdx]
-                                ?.caption
+                              activeModalEvent.galleryImages[
+                                currentPhotoIdx
+                              ]?.caption
                             }
                             variants={funVariants}
                             initial={
                               funEffect === 'flip'
-                                ? { rotateY: 90, opacity: 0.6 }
-                                : { scale: 0.9, opacity: 0.6 }
+                                ? {
+                                    rotateY: 90,
+                                    opacity: 0.6,
+                                  }
+                                : {
+                                    scale: 0.9,
+                                    opacity: 0.6,
+                                  }
                             }
                             animate={funEffect}
-                            exit={{ opacity: 0 }}
+                            exit={{
+                              opacity: 0,
+                            }}
                             className="w-full h-full object-cover relative z-10 pointer-events-none"
                           />
                         </AnimatePresence>
@@ -715,7 +925,8 @@ export const EventsSection: React.FC = () => {
                           </div>
 
                           <div className="text-[10px] sm:text-xs text-emerald-400/90 font-mono mt-0.5 truncate">
-                            {activeModalEvent.badge} · {activeModalEvent.venue}
+                            {activeModalEvent.badge} ·{' '}
+                            {activeModalEvent.venue}
                           </div>
                         </div>
                       </div>
@@ -735,8 +946,13 @@ export const EventsSection: React.FC = () => {
 
                       <div className="flex flex-col items-center gap-0.5 sm:gap-1">
                         <div className="text-xs sm:text-sm font-bold text-emerald-300 tracking-widest font-mono">
-                          {String(currentPhotoIdx + 1).padStart(2, '0')} /{' '}
-                          {String(activeModalEvent.galleryImages.length).padStart(2, '0')}
+                          {String(
+                            currentPhotoIdx + 1
+                          ).padStart(2, '0')}{' '}
+                          /{' '}
+                          {String(
+                            activeModalEvent.galleryImages.length
+                          ).padStart(2, '0')}
                         </div>
 
                         <div className="text-[9px] sm:text-[10px] tracking-widest uppercase text-emerald-500/80 font-mono">
@@ -744,21 +960,28 @@ export const EventsSection: React.FC = () => {
                         </div>
 
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          {activeModalEvent.galleryImages.map((_, dotIdx) => (
-                            <button
-                              key={dotIdx}
-                              onClick={() => {
-                                playCyberClick();
-                                setCurrentPhotoIdx(dotIdx);
-                              }}
-                              aria-label={`Go to photo ${dotIdx + 1}`}
-                              className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                                dotIdx === currentPhotoIdx
-                                  ? 'w-5 sm:w-6 bg-emerald-400 shadow-[0_0_8px_#22c55e]'
-                                  : 'w-1.5 bg-emerald-950 hover:bg-emerald-800'
-                              }`}
-                            />
-                          ))}
+                          {activeModalEvent.galleryImages.map(
+                            (_, dotIdx) => (
+                              <button
+                                key={dotIdx}
+                                onClick={() => {
+                                  playCyberClick();
+                                  setCurrentPhotoIdx(
+                                    dotIdx
+                                  );
+                                }}
+                                aria-label={`Go to photo ${
+                                  dotIdx + 1
+                                }`}
+                                className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                                  dotIdx ===
+                                  currentPhotoIdx
+                                    ? 'w-5 sm:w-6 bg-emerald-400 shadow-[0_0_8px_#22c55e]'
+                                    : 'w-1.5 bg-emerald-950 hover:bg-emerald-800'
+                                }`}
+                              />
+                            )
+                          )}
                         </div>
                       </div>
 

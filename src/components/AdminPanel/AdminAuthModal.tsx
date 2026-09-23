@@ -40,6 +40,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
 
     setLoading(true);
     setError(false);
+    setErrorMessage('');
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/admin/login`, {
@@ -65,18 +66,36 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
       try {
         playAccessGranted();
       } catch {
-        // Ignore audio errors
+        // Ignore audio errors.
       }
 
       if (typeof window !== 'undefined') {
+        /*
+         * Clear any previous authentication values first.
+         * This prevents an old token from being accidentally reused.
+         */
+        sessionStorage.removeItem('cipher_admin_token');
+        localStorage.removeItem('cipher_admin_token');
+
         sessionStorage.removeItem('cipher_admin_locked');
 
+        /*
+         * Store the JWT separately from the boolean authentication state.
+         *
+         * cipher_admin_token = actual JWT
+         * cipher_admin_auth  = login state
+         * cipher_admin_session = legacy login-state flag
+         */
         if (remember) {
           localStorage.setItem('cipher_admin_token', data.token);
         } else {
           sessionStorage.setItem('cipher_admin_token', data.token);
         }
 
+        /*
+         * Keep these boolean flags because the AdminPanel may use them
+         * to determine whether the console is unlocked.
+         */
         sessionStorage.setItem('cipher_admin_session', 'true');
         sessionStorage.setItem('cipher_admin_auth', 'true');
       }
@@ -84,6 +103,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
       onSuccess();
     } catch (error) {
       setError(true);
+
       setErrorMessage(
         error instanceof Error
           ? error.message
@@ -105,10 +125,22 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
           const gain = ctx.createGain();
 
           osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(140, ctx.currentTime);
-          osc.frequency.setValueAtTime(110, ctx.currentTime + 0.1);
 
-          gain.gain.setValueAtTime(0.08, ctx.currentTime);
+          osc.frequency.setValueAtTime(
+            140,
+            ctx.currentTime
+          );
+
+          osc.frequency.setValueAtTime(
+            110,
+            ctx.currentTime + 0.1
+          );
+
+          gain.gain.setValueAtTime(
+            0.08,
+            ctx.currentTime
+          );
+
           gain.gain.exponentialRampToValueAtTime(
             0.001,
             ctx.currentTime + 0.25
@@ -141,6 +173,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
               <div className="text-[10px] tracking-widest text-emerald-400 uppercase font-bold">
                 // SECURITY CLEARANCE
               </div>
+
               <div className="text-sm font-bold text-white tracking-wide">
                 CIPHER ADMIN CONSOLE
               </div>
@@ -158,6 +191,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
         {error && (
           <div className="mb-5 flex items-center gap-2 px-3 py-2 rounded-lg bg-red-950/80 border border-red-600/80 text-red-200 text-xs">
             <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+
             <span>{errorMessage}</span>
           </div>
         )}
@@ -178,6 +212,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                 onChange={(e) => {
                   setPasscode(e.target.value);
                   setError(false);
+                  setErrorMessage('');
                 }}
                 placeholder="Enter admin passcode"
                 autoFocus
@@ -188,6 +223,7 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
               <button
                 type="button"
                 onClick={() => setShowPass(!showPass)}
+                disabled={loading}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600 hover:text-emerald-300 p-1"
               >
                 {showPass ? (
@@ -205,8 +241,10 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
                 type="checkbox"
                 checked={remember}
                 onChange={(e) => setRemember(e.target.checked)}
+                disabled={loading}
                 className="rounded border-emerald-800 bg-black text-emerald-500 focus:ring-emerald-500"
               />
+
               <span>Remember authentication</span>
             </label>
           </div>
@@ -218,9 +256,13 @@ export const AdminAuthModal: React.FC<AdminAuthModalProps> = ({
               className="w-full py-2.5 px-4 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-black font-bold text-xs uppercase tracking-wider shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
             >
               <KeyRound className="w-4 h-4" />
+
               <span>
-                {loading ? 'AUTHENTICATING...' : 'AUTHENTICATE & ENTER'}
+                {loading
+                  ? 'AUTHENTICATING...'
+                  : 'AUTHENTICATE & ENTER'}
               </span>
+
               <ArrowRight className="w-4 h-4" />
             </button>
 

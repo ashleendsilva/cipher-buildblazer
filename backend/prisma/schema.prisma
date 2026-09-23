@@ -55,13 +55,17 @@ model TeamMember {
 }
 
 model Application {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  year      String
-  domain    String
-  message   String?
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  applicantId String?   @unique
+  name        String
+  email       String
+  phone       String?
+  usn         String?
+  year        String
+  domain      String
+  message     String?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
 }
 
 model Activity {
@@ -78,4 +82,15 @@ model Admin {
   passwordHash String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model Announcement {
+  id        String   @id @default(cuid())
+  enabled   Boolean  @default(true)
+  text      String
+  badge     String   @default("ANNOUNCEMENT")
+  linkText  String?
+  linkUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
