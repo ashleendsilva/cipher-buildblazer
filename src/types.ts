@@ -64,6 +64,7 @@ export interface ArchiveItem {
   description: string;
   tags: string[];
   leadSpeaker?: string;
+  url?: string;
 }
 
 export interface TerminalLog {
@@ -71,4 +72,28 @@ export interface TerminalLog {
   type: 'info' | 'success' | 'warn' | 'error' | 'input';
   text: string;
   timestamp?: string;
+}
+
+export interface MemberSubmission {
+  id: string;
+  applicantId: string;
+  name: string;
+  email: string;
+  phone?: string;
+  usn?: string;
+  year: string;
+  domain: string;
+  message: string;
+  github?: string;
+  linkedin?: string;
+  status: 'pending' | 'approved' | 'contacted' | 'rejected';
+  submittedAt: string;
+}
+
+export interface ClubAnnouncement {
+  enabled: boolean;
+  text: string;
+  badge: string;
+  linkText?: string;
+  linkUrl?: string;
 }

@@ -267,6 +267,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Applied Machine Learning',
     category: 'AI & ML',
     year: '2025',
+    url: 'https://scikit-learn.org/stable/',
     description: 'Comprehensive walkthrough of feature engineering, scikit-learn pipelines, model hyperparameter tuning, and real-world inference deployments.',
     tags: ['Scikit-Learn', 'Feature Store', 'Classification', 'Inference'],
     leadSpeaker: 'AI Research Lab & Cipher Leads'
@@ -277,6 +278,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Industrial Visit',
     category: 'Industry & Career',
     year: '2025',
+    url:'https://sjec.ac.in/department-computer-science.php',
     description: 'Excursion to premier enterprise IT parks, touring production tier-3 data centers, CI/CD operations, and cloud infrastructure control centers.',
     tags: ['Cloud Infrastructure', 'Enterprise DevOps', 'Data Centers'],
     leadSpeaker: 'Industry Relations Cell'
@@ -287,6 +289,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'LaTeX Tool',
     category: 'Tools & Systems',
     year: '2025',
+    url: 'https://www.overleaf.com/learn',
     description: 'Masterclass on professional research paper typesetting, mathematical equation styling, IEEE formatting, and automated bibliography management with BibTeX.',
     tags: ['IEEE Standard', 'BibTeX', 'Research Publishing', 'Typography'],
     leadSpeaker: 'Dept Research Committee'
@@ -297,6 +300,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Robotic Process Automation using UiPath',
     category: 'Development',
     year: '2025',
+    url: 'https://academy.uipath.com/',
     description: 'Hands-on laboratory introducing software bots, workflow orchestrator nodes, document understanding OCR engines, and automated business processes.',
     tags: ['UiPath', 'Bot Workflows', 'Enterprise RPA', 'OCR'],
     leadSpeaker: 'UiPath Academic Alliance'
@@ -307,6 +311,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'HACKTO Future 20',
     category: 'Development',
     year: '2025',
+    url: 'https://hacktofuture.sjec.ac.in/',
     description: 'Flagship 24-hour hackathon bringing together multidisciplinary engineering squads to formulate, prototype, and pitch civic & AI software solutions.',
     tags: ['24h Hackathon', 'Rapid Prototyping', 'Product Pitch', 'Cash Prizes'],
     leadSpeaker: 'CIPHER Tech Council'
@@ -317,6 +322,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'How to Win at the Sport of Programming',
     category: 'Development',
     year: '2025',
+    url: 'https://codeforces.com/edu/courses',
     description: 'Competitive programming masterclass dissecting time complexities, dynamic programming recurrence relations, graph traversals, and ICPC strategies.',
     tags: ['Competitive Coding', 'DP', 'Graph Theory', 'ICPC Prep'],
     leadSpeaker: 'CodeChef & LeetCode Alumni'
@@ -327,6 +333,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Introduction to Google Crowdsource',
     category: 'Tools & Systems',
     year: '2024',
+    url: 'https://crowdsource.google.com/',
     description: 'Interactive session exploring data quality in machine learning models, diverse dataset validation, language translation benchmarks, and open community science.',
     tags: ['Google AI', 'Dataset Diversity', 'Crowdsource Community'],
     leadSpeaker: 'Google Crowdsource Influencers'
@@ -337,6 +344,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Educational Session on GitHub',
     category: 'Tools & Systems',
     year: '2024',
+    url: 'https://github.com/skills',
     description: 'From git init to collaborative upstream PRs: interactive workshop covering branch protection, merge conflict resolution, GitHub Actions CI, and markdown READMEs.',
     tags: ['Git CLI', 'Actions CI/CD', 'Open Source PRs', 'Collaboration'],
     leadSpeaker: 'GitHub Campus Experts'
@@ -431,7 +439,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     tags: ['React 18', 'Node.js', 'Express', 'JWT Authentication', 'REST APIs'],
     leadSpeaker: 'Full-Stack Student Mentors'
   }
-];
+]
 
 export const GALLERY_COLLAGE_IMAGES = [
   {
@@ -455,5 +463,3 @@ export const GALLERY_COLLAGE_IMAGES = [
     subtitle: 'Celebrating peer excellence in computing'
   }
 ];
-
-    
