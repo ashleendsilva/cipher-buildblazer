@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 
 interface TopographicMeshCanvasProps {
   fullPage?: boolean;
+  [key: string]: any;
 }
 
 export const TopographicMeshCanvas: React.FC<TopographicMeshCanvasProps> = ({ fullPage = true }) => {
@@ -38,7 +39,7 @@ export const TopographicMeshCanvas: React.FC<TopographicMeshCanvasProps> = ({ fu
     let scrollY = window.scrollY || 0;
     let targetScrollY = scrollY;
 
-    const onMouseMove = (e: MouseEvent) => {
+    const onMouseMove = (e: MouseEvent | PointerEvent) => {
       if (fullPage) {
         targetMouseX = e.clientX;
         targetMouseY = e.clientY;
@@ -47,6 +48,8 @@ export const TopographicMeshCanvas: React.FC<TopographicMeshCanvasProps> = ({ fu
         targetMouseX = e.clientX - rect.left;
         targetMouseY = e.clientY - rect.top;
       }
+      mouseX = targetMouseX;
+      mouseY = targetMouseY;
     };
 
     const onScroll = () => {
@@ -54,15 +57,16 @@ export const TopographicMeshCanvas: React.FC<TopographicMeshCanvasProps> = ({ fu
     };
 
     window.addEventListener('mousemove', onMouseMove, { passive: true });
+    window.addEventListener('pointermove', onMouseMove, { passive: true });
     window.addEventListener('scroll', onScroll, { passive: true });
 
     let time = 0;
 
     const render = () => {
       time += 0.009;
-      // Smooth lerp mouse & scroll parallax
-      mouseX += (targetMouseX - mouseX) * 0.05;
-      mouseY += (targetMouseY - mouseY) * 0.05;
+      // Direct instant mouse tracking - zero lag
+      mouseX = targetMouseX;
+      mouseY = targetMouseY;
       scrollY += (targetScrollY - scrollY) * 0.08;
 
       ctx.clearRect(0, 0, width, height);
@@ -136,6 +140,7 @@ export const TopographicMeshCanvas: React.FC<TopographicMeshCanvasProps> = ({ fu
     return () => {
       cancelAnimationFrame(animId);
       window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('pointermove', onMouseMove);
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', resize);
     };

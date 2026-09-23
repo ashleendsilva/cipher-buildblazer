@@ -101,16 +101,7 @@ export const Footer: React.FC<FooterProps> = ({ onTriggerRoot }) => {
 
           <div className="flex items-center gap-4 text-[11px]">
             <span className="text-emerald-700">KERNEL // v2.6.4</span>
-            <button
-              onClick={() => {
-                playCyberClick();
-                onTriggerRoot();
-              }}
-              title="Secret Backdoor"
-              className="text-emerald-700 hover:text-emerald-400 transition-colors cursor-pointer"
-            >
-              [ ROOT GATEWAY ]
-            </button>
+            
           </div>
         </div>
       </div>

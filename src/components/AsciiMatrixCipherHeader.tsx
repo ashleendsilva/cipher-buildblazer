@@ -67,14 +67,14 @@ export const AsciiMatrixCipherHeader: React.FC = () => {
         offCtx.textAlign = 'center';
         offCtx.textBaseline = 'middle';
 
-        // Dynamically calculate font size to fit container width nicely
+        // Dynamically calculate font size to fit container width nicely (enlarged & prominent)
         const text = 'C I P H E R';
-        let letterFontSize = Math.min(w * 0.17, 140);
+        let letterFontSize = Math.min(w * 0.20, 168);
         offCtx.font = `900 ${letterFontSize}px 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace`;
 
         const measuredWidth = offCtx.measureText(text).width;
-        if (measuredWidth > w * 0.94) {
-          letterFontSize = letterFontSize * ((w * 0.94) / measuredWidth);
+        if (measuredWidth > w * 0.95) {
+          letterFontSize = letterFontSize * ((w * 0.95) / measuredWidth);
           offCtx.font = `900 ${letterFontSize}px 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace`;
         }
 
@@ -83,18 +83,19 @@ export const AsciiMatrixCipherHeader: React.FC = () => {
         const imgData = offCtx.getImageData(0, 0, w, h);
         const data = imgData.data;
 
-        // Density tuned to match reference image (approx 18-20 character rows)
-        const stepY = Math.max(8, Math.round(letterFontSize / 13));
-        const stepX = Math.max(6, Math.round(stepY * 0.72));
-        dynamicFontSize = Math.max(7, Math.round(stepY * 0.95));
+        // Density tuned for high visibility and crisp glyphs
+        const stepY = Math.max(8, Math.round(letterFontSize / 13.2));
+        const stepX = Math.max(6, Math.round(stepY * 0.70));
+        dynamicFontSize = Math.max(8, Math.round(stepY * 1.0));
 
-        // Color palette for glowing sparks (matching reference cyan/white/emerald highlights)
+        // Color palette for glowing sparks (extra vibrant cyan/pure white/neon highlights)
         const sparkColors = [
-          '#67e8f9', // cyan
-          '#34d399', // bright emerald
+          '#a5f3fc', // ultra bright cyan
+          '#6ee7b7', // radiant mint
           '#a7f3d0', // mint white
-          '#ffffff', // pure white
+          '#ffffff', // pure intense white
           '#4ade80', // vibrant neon green
+          '#86efac', // glowing lime emerald
         ];
 
         const points: GlyphPoint[] = [];
@@ -107,15 +108,15 @@ export const AsciiMatrixCipherHeader: React.FC = () => {
             // If inside the letter boundary
             if (alpha > 75) {
               const char = ASCII_GLYPHS[Math.floor(Math.random() * ASCII_GLYPHS.length)];
-              // ~5% of glyphs are bright highlighted sparks (as in reference image)
-              const isSpark = Math.random() < 0.055;
+              // ~9% of glyphs are bright highlighted sparks (increased for extra brightness)
+              const isSpark = Math.random() < 0.09;
               const sparkColor = sparkColors[Math.floor(Math.random() * sparkColors.length)];
 
               points.push({
                 x,
                 y,
                 char,
-                baseBrightness: 0.55 + Math.random() * 0.45,
+                baseBrightness: 0.70 + Math.random() * 0.30,
                 isBrightSpark: isSpark,
                 sparkColor,
                 scrambleCooldown: Math.floor(Math.random() * 50 + 10),
@@ -130,12 +131,20 @@ export const AsciiMatrixCipherHeader: React.FC = () => {
       }
     };
 
+    let resizeRafId: number | null = null;
     const resize = () => {
       if (!canvas) return;
       const parentWidth = canvas.parentElement?.clientWidth;
-      width = parentWidth && parentWidth > 50 ? parentWidth : Math.min(window.innerWidth - 32, 960);
-      height = Math.max(160, Math.min(280, Math.round(width * 0.26)));
+      const newWidth = parentWidth && parentWidth > 50 ? parentWidth : Math.min(window.innerWidth - 32, 1080);
+      const newHeight = Math.max(190, Math.min(320, Math.round(newWidth * 0.29)));
 
+      // Avoid unnecessary canvas DOM resizing if dimension change is negligible
+      if (Math.abs(newWidth - width) < 2 && Math.abs(newHeight - height) < 2 && canvas.width > 0) {
+        return;
+      }
+
+      width = newWidth;
+      height = newHeight;
       dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = width * dpr;
       canvas.height = height * dpr;
@@ -152,13 +161,21 @@ export const AsciiMatrixCipherHeader: React.FC = () => {
       generateGlyphs(width, height);
     };
 
+    const debouncedResize = () => {
+      if (resizeRafId) cancelAnimationFrame(resizeRafId);
+      resizeRafId = requestAnimationFrame(() => {
+        resize();
+      });
+    };
+
     resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', debouncedResize);
 
     let resizeObserver: ResizeObserver | null = null;
     if (canvas.parentElement && typeof ResizeObserver !== 'undefined') {
-      resizeObserver = new ResizeObserver(() => {
-        resize();
+      resizeObserver = new ResizeObserver((entries) => {
+        if (!entries || !entries.length) return;
+        debouncedResize();
       });
       resizeObserver.observe(canvas.parentElement);
     }
@@ -168,6 +185,8 @@ export const AsciiMatrixCipherHeader: React.FC = () => {
       const rect = canvas.getBoundingClientRect();
       targetMouseX = clientX - rect.left;
       targetMouseY = clientY - rect.top;
+      mouseX = targetMouseX;
+      mouseY = targetMouseY;
     };
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -234,9 +253,9 @@ export const AsciiMatrixCipherHeader: React.FC = () => {
     const render = () => {
       time += 0.016;
 
-      // Smooth mouse follow
-      mouseX += (targetMouseX - mouseX) * 0.12;
-      mouseY += (targetMouseY - mouseY) * 0.12;
+      // Direct instant mouse follow
+      mouseX = targetMouseX;
+      mouseY = targetMouseY;
 
       ctx.clearRect(0, 0, width, height);
 
@@ -248,9 +267,9 @@ export const AsciiMatrixCipherHeader: React.FC = () => {
         const baseX = (width / numLines) * i;
         ctx.beginPath();
 
-        // Vary opacity across canvas
-        const lineAlpha = 0.1 + Math.sin((i / numLines) * Math.PI) * 0.16;
-        ctx.strokeStyle = `rgba(34, 197, 94, ${lineAlpha})`;
+        // Vary opacity across canvas (brighter & crisp neon)
+        const lineAlpha = 0.16 + Math.sin((i / numLines) * Math.PI) * 0.22;
+        ctx.strokeStyle = `rgba(52, 211, 153, ${lineAlpha})`;
 
         const segments = 36;
         for (let s = 0; s <= segments; s++) {
@@ -344,7 +363,7 @@ export const AsciiMatrixCipherHeader: React.FC = () => {
         }
 
         let renderChar = pt.char;
-        let color = '#22c55e';
+        let color = '#4ade80';
         let alpha = pt.baseBrightness;
 
         if (nearMouse) {
@@ -352,30 +371,28 @@ export const AsciiMatrixCipherHeader: React.FC = () => {
           if (Math.random() < 0.35) {
             renderChar = ASCII_GLYPHS[Math.floor(Math.random() * ASCII_GLYPHS.length)];
           }
-          color = '#a7f3d0';
-          alpha = 0.95 + mouseFactor * 0.05;
+          color = '#ffffff';
+          alpha = 1.0;
         } else if (pt.isBrightSpark) {
-          // Distinct glowing spark characters (as seen in user screenshot)
+          // Distinct glowing spark characters
           color = pt.sparkColor;
           alpha = 1.0;
         } else if (shockwaveImpact > 0) {
           color = '#67e8f9';
           alpha = 1.0;
         } else {
-          // Normal matrix characters: varied shades of green/emerald
-          alpha = pt.baseBrightness * 0.85;
-          color = pt.baseBrightness > 0.72 ? '#4ade80' : '#10b981';
+          // Normal matrix characters: vibrant neon green
+          alpha = Math.min(1, pt.baseBrightness * 1.05 + 0.12);
+          color = pt.baseBrightness > 0.72 ? '#86efac' : '#4ade80';
         }
 
         ctx.save();
         ctx.fillStyle = color;
         ctx.globalAlpha = Math.min(1, alpha + shockwaveImpact * 0.5);
 
-        // Bright sparks, hovered chars, and shockwave get neon glow
-        if (pt.isBrightSpark || nearMouse || shockwaveImpact > 0.3) {
-          ctx.shadowColor = color;
-          ctx.shadowBlur = nearMouse ? 12 : 8;
-        }
+        // Neon glow for characters
+        ctx.shadowColor = color;
+        ctx.shadowBlur = pt.isBrightSpark || nearMouse || shockwaveImpact > 0.3 ? 16 : 8;
 
         ctx.fillText(renderChar, pt.x, pt.y);
         ctx.restore();
@@ -422,8 +439,9 @@ export const AsciiMatrixCipherHeader: React.FC = () => {
 
     return () => {
       cancelAnimationFrame(animId);
+      if (resizeRafId) cancelAnimationFrame(resizeRafId);
       resizeObserver?.disconnect();
-      window.removeEventListener('resize', resize);
+      window.removeEventListener('resize', debouncedResize);
       canvas.removeEventListener('mousemove', handleMouseMove);
       canvas.removeEventListener('touchmove', handleTouchMove);
       canvas.removeEventListener('mouseenter', handleMouseEnter);
@@ -436,23 +454,26 @@ export const AsciiMatrixCipherHeader: React.FC = () => {
   return (
     <div
       ref={containerRef}
-      className="relative w-full max-w-5xl mx-auto flex flex-col items-center justify-center my-2 select-none group cursor-pointer"
+      className="relative w-full max-w-6xl mx-auto flex flex-col items-center justify-center my-3 select-none group cursor-pointer"
       title="Interactive ASCII Matrix Header — Click or Hover to Scramble"
     >
       {/* Screen Reader and Search Engine Accessible H1 Header */}
       <h1 className="sr-only">CIPHER</h1>
 
+      {/* Radiant ambient glow backdrop */}
+      <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-[100px] pointer-events-none -z-10 scale-95" />
+
       {/* Main Interactive ASCII Matrix & Topographic Canvas */}
       <canvas
         ref={canvasRef}
-        className="w-full h-auto drop-shadow-[0_0_35px_rgba(34,197,94,0.45)] transition-transform duration-300 group-hover:scale-[1.01]"
+        className="w-full h-auto drop-shadow-[0_0_55px_rgba(34,197,94,0.7)] filter brightness-125 contrast-110 transition-transform duration-300 group-hover:scale-[1.015]"
       />
 
       {/* Floating Hologram Scanning Line */}
-      <div className="absolute -inset-x-4 h-[1.5px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-25 animate-pulse pointer-events-none" />
+      <div className="absolute -inset-x-6 h-[2px] bg-gradient-to-r from-transparent via-emerald-300 to-transparent opacity-40 animate-pulse pointer-events-none" />
 
       {/* Interactive Micro-Tag */}
-      <div className="absolute -bottom-2 flex items-center gap-1.5 text-[9px] font-mono tracking-widest text-emerald-600/80 bg-[#040c06]/80 px-2 py-0.5 rounded border border-emerald-950/80 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+      <div className="absolute -bottom-2 flex items-center gap-1.5 text-[9px] font-mono tracking-widest text-emerald-400 bg-[#040c06]/90 px-2.5 py-0.5 rounded border border-emerald-800/80 shadow-[0_0_10px_rgba(34,197,94,0.2)] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
         <span>ASCII MATRIX MESH // HOVER &amp; CLICK INTERACTIVE</span>
       </div>

@@ -16,6 +16,7 @@ images = [
     "cipher2.JPG",
     "cipher3.JPG",
     "cipher4.JPG",
+    "cipher-logo.webp"
 ]
 
 for filename in images:

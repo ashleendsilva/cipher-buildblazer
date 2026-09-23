@@ -36,30 +36,42 @@ interface GridNodePulse {
 interface InteractiveMouseGridProps {
   onGridClickPulse?: (x: number, y: number) => void;
   fullPage?: boolean;
+  [key: string]: any;
 }
 
 export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = ({ fullPage = true }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const gridCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const cursorCanvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const gridCanvas = gridCanvasRef.current;
+    const cursorCanvas = cursorCanvasRef.current;
+    if (!gridCanvas) return;
+    const gridCtx = gridCanvas.getContext('2d');
+    const cursorCtx = cursorCanvas ? cursorCanvas.getContext('2d') : null;
+    if (!gridCtx) return;
 
     let animId: number;
     let width = 0;
     let height = 0;
 
     const resize = () => {
-      if (!canvas) return;
+      if (!gridCanvas) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      width = fullPage ? window.innerWidth : (canvas.parentElement?.clientWidth || window.innerWidth);
-      height = fullPage ? window.innerHeight : (canvas.parentElement?.clientHeight || window.innerHeight);
-      canvas.width = width * dpr;
-      canvas.height = height * dpr;
-      ctx.resetTransform?.();
-      ctx.scale(dpr, dpr);
+      width = fullPage ? window.innerWidth : (gridCanvas.parentElement?.clientWidth || window.innerWidth);
+      height = fullPage ? window.innerHeight : (gridCanvas.parentElement?.clientHeight || window.innerHeight);
+
+      gridCanvas.width = width * dpr;
+      gridCanvas.height = height * dpr;
+      gridCtx.resetTransform?.();
+      gridCtx.scale(dpr, dpr);
+
+      if (cursorCanvas && cursorCtx) {
+        cursorCanvas.width = width * dpr;
+        cursorCanvas.height = height * dpr;
+        cursorCtx.resetTransform?.();
+        cursorCtx.scale(dpr, dpr);
+      }
     };
 
     resize();
@@ -71,6 +83,8 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = ({ full
     let targetMouseX = -1000;
     let targetMouseY = -1000;
     let isHovered = false;
+    let isMouseDown = false;
+    let isInteractiveHover = false;
     let lastPulseTime = 0;
     let lastMoveDistance = 0;
     let prevMoveX = -1000;
@@ -81,7 +95,7 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = ({ full
     const activeNodes = new Map<string, GridNodePulse>();
     let rippleIdCounter = 0;
 
-    const parent = canvas.parentElement;
+    const parent = gridCanvas.parentElement;
 
     const spawnRippleDistortion = (x: number, y: number) => {
       // Create expanding physical ripple that bends grid lines
@@ -158,17 +172,28 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = ({ full
       }
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (fullPage) {
-        targetMouseX = e.clientX;
-        targetMouseY = e.clientY;
-      } else {
-        if (!parent) return;
+    const handleMouseMove = (e: MouseEvent | PointerEvent) => {
+      let curX = e.clientX;
+      let curY = e.clientY;
+      if (!fullPage && parent) {
         const rect = parent.getBoundingClientRect();
-        targetMouseX = e.clientX - rect.left;
-        targetMouseY = e.clientY - rect.top;
+        curX = e.clientX - rect.left;
+        curY = e.clientY - rect.top;
       }
+      targetMouseX = curX;
+      targetMouseY = curY;
+      // Immediately sync position to prevent cursor pointer lag
+      mouseX = curX;
+      mouseY = curY;
       isHovered = true;
+
+      // Detect interactive element under pointer for dynamic cursor morphing
+      try {
+        const target = (e.target as HTMLElement | null) || (document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null);
+        isInteractiveHover = !!target?.closest('button, a, input, textarea, select, [role="button"], [tabindex], .cursor-pointer, [data-interactive]');
+      } catch {
+        isInteractiveHover = false;
+      }
 
       // Calculate movement delta to trigger glowing pulses on significant motion
       const dist = Math.hypot(targetMouseX - prevMoveX, targetMouseY - prevMoveY);
@@ -192,9 +217,15 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = ({ full
       isHovered = false;
       targetMouseX = -1000;
       targetMouseY = -1000;
+      mouseX = -1000;
+      mouseY = -1000;
+      if (cursorCtx) {
+        cursorCtx.clearRect(0, 0, width, height);
+      }
     };
 
-    const handleClickOrDown = (e: MouseEvent | PointerEvent) => {
+    const handlePointerDown = (e: MouseEvent | PointerEvent) => {
+      isMouseDown = true;
       let clickX = e.clientX;
       let clickY = e.clientY;
       if (!fullPage && parent) {
@@ -216,16 +247,24 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = ({ full
       }
     };
 
+    const handlePointerUp = () => {
+      isMouseDown = false;
+    };
+
     if (fullPage) {
       window.addEventListener('mousemove', handleMouseMove, { passive: true });
+      window.addEventListener('pointermove', handleMouseMove, { passive: true });
       window.addEventListener('mouseenter', handleMouseEnter);
       window.addEventListener('mouseleave', handleMouseLeave);
-      window.addEventListener('pointerdown', handleClickOrDown, { passive: true });
+      window.addEventListener('pointerdown', handlePointerDown, { passive: true });
+      window.addEventListener('pointerup', handlePointerUp, { passive: true });
     } else if (parent) {
       parent.addEventListener('mousemove', handleMouseMove);
+      parent.addEventListener('pointermove', handleMouseMove, { passive: true });
       parent.addEventListener('mouseenter', handleMouseEnter);
       parent.addEventListener('mouseleave', handleMouseLeave);
-      parent.addEventListener('pointerdown', handleClickOrDown);
+      parent.addEventListener('pointerdown', handlePointerDown);
+      window.addEventListener('pointerup', handlePointerUp, { passive: true });
     }
 
     // Mathematical grid point displacement from active ripples
@@ -288,13 +327,13 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = ({ full
         idleTimer = 0;
       }
 
-      // Smooth mouse follow
-      if (isHovered) {
-        mouseX += (targetMouseX - mouseX) * 0.12;
-        mouseY += (targetMouseY - mouseY) * 0.12;
+      // Direct instantaneous mouse follow - 0 lag
+      if (isHovered && targetMouseX > -500) {
+        mouseX = targetMouseX;
+        mouseY = targetMouseY;
       } else {
-        mouseX += (-1000 - mouseX) * 0.05;
-        mouseY += (-1000 - mouseY) * 0.05;
+        mouseX = -1000;
+        mouseY = -1000;
       }
 
       // Update ripple waves
@@ -307,6 +346,7 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = ({ full
         }
       }
 
+      const ctx = gridCtx;
       ctx.clearRect(0, 0, width, height);
 
       const hasRipples = ripples.length > 0;
@@ -542,51 +582,105 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = ({ full
         }
       }
 
-      // 4. Cursor Reticle & Digital Coordinates HUD
-      if (isHovered && mouseX > 0 && mouseY > 0 && mouseX < width && mouseY < height) {
-        ctx.save();
+      // 4. Cursor Reticle & Digital Coordinates HUD (Drawn on top-level overlay canvas at z-[99999])
+      const cCtx = cursorCtx || ctx;
+      if (cursorCtx) {
+        cursorCtx.clearRect(0, 0, width, height);
+      }
+
+      if (isHovered && mouseX > -500 && mouseY > -500 && mouseX < width && mouseY < height) {
+        cCtx.save();
         // Snapped grid target coordinates
         const snapX = Math.round(mouseX / gridSize) * gridSize;
         const snapY = Math.round(mouseY / gridSize) * gridSize;
 
-        // Snapped node box outline
-        ctx.strokeStyle = 'rgba(34, 197, 94, 0.4)';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(snapX - gridSize / 2, snapY - gridSize / 2, gridSize, gridSize);
+        // Snapped node box outline (subtle guide)
+        cCtx.strokeStyle = isInteractiveHover ? 'rgba(74, 222, 128, 0.45)' : 'rgba(34, 197, 94, 0.25)';
+        cCtx.lineWidth = 1;
+        cCtx.strokeRect(snapX - gridSize / 2, snapY - gridSize / 2, gridSize, gridSize);
 
         // Smooth cursor target circle with pulsing radar ring
         const reticlePulse = (Math.sin(time * 6) + 1) * 0.5;
-        ctx.strokeStyle = '#4ade80';
-        ctx.lineWidth = 1.5;
-        ctx.shadowColor = '#22c55e';
-        ctx.shadowBlur = 15;
-        ctx.beginPath();
-        ctx.arc(mouseX, mouseY, 14 + reticlePulse * 4, 0, Math.PI * 2);
-        ctx.stroke();
+        const baseRadius = isMouseDown ? 9 : isInteractiveHover ? 15 : 12;
+        const currentRadius = baseRadius + (isMouseDown ? 0 : reticlePulse * 2.5);
 
-        // Crosshair ticks
-        ctx.beginPath();
-        ctx.moveTo(mouseX - 22, mouseY);
-        ctx.lineTo(mouseX - 8, mouseY);
-        ctx.moveTo(mouseX + 8, mouseY);
-        ctx.lineTo(mouseX + 22, mouseY);
-        ctx.moveTo(mouseX, mouseY - 22);
-        ctx.lineTo(mouseX, mouseY - 8);
-        ctx.moveTo(mouseX, mouseY + 8);
-        ctx.lineTo(mouseX, mouseY + 22);
-        ctx.stroke();
+        cCtx.strokeStyle = isMouseDown ? '#86efac' : isInteractiveHover ? '#4ade80' : '#22c55e';
+        cCtx.lineWidth = isMouseDown ? 2 : isInteractiveHover ? 1.75 : 1.4;
+        cCtx.shadowColor = '#22c55e';
+        cCtx.shadowBlur = isMouseDown ? 18 : isInteractiveHover ? 14 : 10;
+        cCtx.beginPath();
+        cCtx.arc(mouseX, mouseY, currentRadius, 0, Math.PI * 2);
+        cCtx.stroke();
 
-        // Digital coordinates tag
-        ctx.font = '9px monospace';
-        ctx.fillStyle = 'rgba(74, 222, 128, 0.85)';
-        ctx.shadowBlur = 0;
-        ctx.fillText(
-          `G[${Math.round(snapX / gridSize)},${Math.round(snapY / gridSize)}] • ${Math.round(mouseX)},${Math.round(mouseY)}`,
-          mouseX + 16,
-          mouseY - 12
-        );
+        // 4 Precision crosshair ticks extending outward
+        const tickInner = currentRadius + 3;
+        const tickOuter = currentRadius + (isInteractiveHover ? 9 : 7);
+        cCtx.lineWidth = 1.2;
+        cCtx.beginPath();
+        // Horizontal
+        cCtx.moveTo(mouseX - tickOuter, mouseY);
+        cCtx.lineTo(mouseX - tickInner, mouseY);
+        cCtx.moveTo(mouseX + tickInner, mouseY);
+        cCtx.lineTo(mouseX + tickOuter, mouseY);
+        // Vertical
+        cCtx.moveTo(mouseX, mouseY - tickOuter);
+        cCtx.lineTo(mouseX, mouseY - tickInner);
+        cCtx.moveTo(mouseX, mouseY + tickInner);
+        cCtx.lineTo(mouseX, mouseY + tickOuter);
+        cCtx.stroke();
 
-        ctx.restore();
+        // Target Lock-On brackets when hovering buttons / interactive links
+        if (isInteractiveHover) {
+          const bSize = currentRadius + 5;
+          const bLen = 4;
+          cCtx.lineWidth = 1.5;
+          cCtx.strokeStyle = '#86efac';
+          cCtx.beginPath();
+          // Top-left
+          cCtx.moveTo(mouseX - bSize, mouseY - bSize + bLen);
+          cCtx.lineTo(mouseX - bSize, mouseY - bSize);
+          cCtx.lineTo(mouseX - bSize + bLen, mouseY - bSize);
+          // Top-right
+          cCtx.moveTo(mouseX + bSize - bLen, mouseY - bSize);
+          cCtx.lineTo(mouseX + bSize, mouseY - bSize);
+          cCtx.lineTo(mouseX + bSize, mouseY - bSize + bLen);
+          // Bottom-left
+          cCtx.moveTo(mouseX - bSize, mouseY + bSize - bLen);
+          cCtx.lineTo(mouseX - bSize, mouseY + bSize);
+          cCtx.lineTo(mouseX - bSize + bLen, mouseY + bSize);
+          // Bottom-right
+          cCtx.moveTo(mouseX + bSize - bLen, mouseY + bSize);
+          cCtx.lineTo(mouseX + bSize, mouseY + bSize);
+          cCtx.lineTo(mouseX + bSize, mouseY + bSize - bLen);
+          cCtx.stroke();
+        }
+
+        // Center pinpoint target dot (replaces mouse cursor arrow with 100% precision)
+        cCtx.shadowBlur = 10;
+        cCtx.shadowColor = '#22c55e';
+        cCtx.fillStyle = '#4ade80';
+        cCtx.beginPath();
+        cCtx.arc(mouseX, mouseY, isMouseDown ? 3.5 : 2.5, 0, Math.PI * 2);
+        cCtx.fill();
+
+        // Pure white core pinpoint dot for razor precision
+        cCtx.fillStyle = '#ffffff';
+        cCtx.beginPath();
+        cCtx.arc(mouseX, mouseY, 1.2, 0, Math.PI * 2);
+        cCtx.fill();
+
+        // Digital coordinates / status HUD tag
+        cCtx.font = '9px monospace';
+        cCtx.fillStyle = isInteractiveHover ? '#86efac' : 'rgba(74, 222, 128, 0.85)';
+        cCtx.shadowBlur = 0;
+        const statusText = isMouseDown
+          ? 'EXEC // PULSE'
+          : isInteractiveHover
+          ? 'LOCK // CLICK'
+          : `G[${Math.round(snapX / gridSize)},${Math.round(snapY / gridSize)}] • ${Math.round(mouseX)},${Math.round(mouseY)}`;
+        cCtx.fillText(statusText, mouseX + 16, mouseY - 12);
+
+        cCtx.restore();
       }
 
       animId = requestAnimationFrame(render);
@@ -599,22 +693,37 @@ export const InteractiveMouseGrid: React.FC<InteractiveMouseGridProps> = ({ full
       window.removeEventListener('resize', resize);
       if (fullPage) {
         window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('pointermove', handleMouseMove);
         window.removeEventListener('mouseenter', handleMouseEnter);
         window.removeEventListener('mouseleave', handleMouseLeave);
-        window.removeEventListener('pointerdown', handleClickOrDown);
+        window.removeEventListener('pointerdown', handlePointerDown);
+        window.removeEventListener('pointerup', handlePointerUp);
       } else if (parent) {
         parent.removeEventListener('mousemove', handleMouseMove);
+        parent.removeEventListener('pointermove', handleMouseMove);
         parent.removeEventListener('mouseenter', handleMouseEnter);
         parent.removeEventListener('mouseleave', handleMouseLeave);
-        parent.removeEventListener('pointerdown', handleClickOrDown);
+        parent.removeEventListener('pointerdown', handlePointerDown);
+        window.removeEventListener('pointerup', handlePointerUp);
       }
     };
   }, [fullPage]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={`${fullPage ? 'fixed inset-0 z-0' : 'absolute inset-0 z-0'} pointer-events-none w-full h-full`}
-    />
+    <>
+      {/* Background Cyber Grid & Shockwaves (behind cards) */}
+      <canvas
+        ref={gridCanvasRef}
+        className={`${fullPage ? 'fixed inset-0 z-0' : 'absolute inset-0 z-0'} pointer-events-none w-full h-full`}
+      />
+
+      {/* Foreground Cyber Pointer HUD (at z-[99999] floating above all cards, buttons, and modals) */}
+      {fullPage && (
+        <canvas
+          ref={cursorCanvasRef}
+          className="fixed inset-0 z-[99999] pointer-events-none w-full h-full"
+        />
+      )}
+    </>
   );
 };

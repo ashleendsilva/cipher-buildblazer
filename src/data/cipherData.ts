@@ -120,6 +120,7 @@ export const LEADERS: Leader[] = [
     email: 'chaitra.r@sjec.ac.in'
   },
 ];
+
 export const EVENTS: EventItem[] = [
   {
     id: 'lumiere-gala',
@@ -133,14 +134,14 @@ export const EVENTS: EventItem[] = [
     fullNarrative: [
       'The Department of Computer Science and Engineering (CSE) held its branch entry programme, "Lumière – The Gala," on 29 October 2025 at the Kalam Auditorium. Organised by the Cipher Association, the event welcomed students into the department through a formal gathering centered on the theme "Where Glam Meets Glow."',
       'The venue featured coordinated red, gold and black décor, floral arrangements, illuminated panels and a central Lumière backdrop, creating an atmospheric setting for the inaugural celebration.',
-      'The programme gave students an opportunity to interact with peers and take part in a shared departmental event beyond academics, highlighting the role of the Cipher Association in organising student-led activities. It represented a celebratory entry that marked the students’ transition into the department and reinforced a sense of collective identity.'
+      'The programme gave students an opportunity to interact with peers and take part in a shared departmental event beyond academics, highlighting the role of the Cipher Association in organising student-led activities. The event concluded as a formal branch entry that marked the students’ transition into the department and reinforced a sense of collective identity.'
     ],
     highlights: [
       'Theme: "Where Glam Meets Glow"',
       'Coordinated Red, Gold & Black Décor',
       'Kalam Auditorium Grand Assembly',
-      'Ceremonial Lamp Lighting & Induction',
-      'Cultural Performances & Faculty Felicitations'
+      'Ceremonial Lamp Lighting ',
+      'Cultural Performances'
     ],
     galleryImages: [
       {
@@ -150,37 +151,37 @@ export const EVENTS: EventItem[] = [
       },
       {
         url: '/images/IMG_7350.JPG',
-        caption: 'Lumière themed stage lighting and commemorative floral installations',
+        caption: '',
         tag: ''
       },
       {
         url: '/images/IMG_7369.JPG',
-        caption: 'CIPHER student association executive committee induction ceremony',
+        caption: '',
         tag: ''
       },
       {
         url: '/images/IMG_7372.JPG',
-        caption: 'Red & gold coordinated celebratory formal gathering with faculty mentors',
+        caption: '',
         tag: ''
       },
       {
         url: '/images/IMG_7386.JPG',
-        caption: 'Auditorium crowd of CSE freshers and senior department peers',
+        caption: '',
         tag: ''
       },
       {
         url: '/images/IMG_7354.JPG',
-        caption: 'Cultural performances highlighting rhythm and engineering camaraderie',
+        caption: '',
         tag: ''
       },
       {
         url: '/images/IMG_7388.JPG',
-        caption: 'Interactive branch welcome games and departmental icebreakers',
+        caption: '',
         tag: ''
       },
       {
         url: '/images/IMG_7397.JPG',
-        caption: 'Grand finale group photograph with dignitaries, faculty & Cipher leaders',
+        caption: '',
         tag: ''
       }
     ]
@@ -196,7 +197,7 @@ export const EVENTS: EventItem[] = [
     shortSummary: 'A technical competition on prompt engineering and AI tools by the AgentBlazer Club and Cipher. Track 1 (1st Year) covered invitation, logo and image recreation; Track 2 (2nd Year) tested JSON conversion, Python debugging and a Gemini AI security prompt challenge.',
     fullNarrative: [
       'Organized by the AgentBlazer Club and Cipher under the guidance of Ms. Nisha J Roche, Ms. Jaishma K, and HOD Dr. Melwyn D’Souza, this technical competition focused on prompt engineering and AI tools (mapped to PO4, PO5, PO8, PO11).',
-      'The competition was partitioned into two competitive tracks tailored to students’ technical maturity: Track 1 tested generative visual prompting and asset reconstruction, while Track 2 presented rigorous code correction, structured data transformation, and LLM security jailbreak defenses.',
+      'The competition was partitioned into two competitive tracks tailored to students’ technical maturity: Track 1 (1st Year) featured invitation generation, logo recreation, and image recreation rounds, with Chinmayee, Chris Royston Monteiro, and Deeksha Ravi Moger taking top honors., while Track 2 presented rigorous code correction, structured data transformation, and LLM security jailbreak defenses.',
       'Students demonstrated deep fluency with modern multimodal tools, prompt chain conditioning, and algorithmic problem-solving in a fast-paced timed environment.'
     ],
     tracks: [
@@ -226,9 +227,8 @@ export const EVENTS: EventItem[] = [
     highlights: [
       'Co-hosted by AgentBlazer Club & CIPHER',
       'Guided by Dr. Melwyn D\'Souza, Ms. Nisha J Roche & Ms. Jaishma K',
-      'Real-time automated evaluation scoreboard',
       'Gemini AI Security & System Prompt Injection Defense',
-      'Certificates of Excellence and cash prizes awarded'
+      'Python code debugging'
     ],
     galleryImages: [
       {
@@ -278,7 +278,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Industrial Visit',
     category: 'Industry & Career',
     year: '2025',
-    url:'https://sjec.ac.in/department-computer-science.php',
+    url: 'https://sjec.ac.in/department-computer-science.php',
     description: 'Excursion to premier enterprise IT parks, touring production tier-3 data centers, CI/CD operations, and cloud infrastructure control centers.',
     tags: ['Cloud Infrastructure', 'Enterprise DevOps', 'Data Centers'],
     leadSpeaker: 'Industry Relations Cell'
@@ -355,6 +355,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Industrial Visit',
     category: 'Industry & Career',
     year: '2024',
+    url: 'https://sjec.ac.in/department-computer-science.php',
     description: 'On-site technical exposure visit to leading software engineering campuses and automotive embedded systems testing facilities.',
     tags: ['Software Engineering', 'Automotive Embedded', 'QA Pipelines'],
     leadSpeaker: 'Faculty Outreach Lead'
@@ -365,6 +366,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'UDAAN Mock Interview',
     category: 'Industry & Career',
     year: '2024',
+    url: 'https://sjec.ac.in/training-and-placements.php',
     description: 'Rigorous campus interview simulation with senior alumni and HR specialists, featuring DSA technical screenings, system design rounds, and HR behavioral appraisals.',
     tags: ['Mock Technical Rounds', 'System Design', 'Behavioral HR', 'Resume Audit'],
     leadSpeaker: 'SJEC Placement Cell & Alumni Panel'
@@ -375,6 +377,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Freshers Onboarding Programme',
     category: 'Academic & Grants',
     year: '2024',
+    url: 'https://sjec.ac.in/',
     description: 'Departmental orientation introducing curriculum roadmaps, computing club domains, laboratory ethics, open-source communities, and senior mentorship pairings.',
     tags: ['Branch Induction', 'Mentorship', 'Curriculum Guide'],
     leadSpeaker: 'CIPHER Office Bearers'
@@ -385,6 +388,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Projects Funded by KSCST',
     category: 'Academic & Grants',
     year: '2024',
+    url: 'https://www.kscst.iisc.ernet.in/spp.html',
     description: 'Showcase and grant writing incubator guiding students in submitting high-impact engineering projects to the Karnataka State Council for Science and Technology.',
     tags: ['Research Grants', 'KSCST Funding', 'Patent Filing', 'State Innovation'],
     leadSpeaker: 'Research Advisory Board'
@@ -395,6 +399,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Generative AI Tools for Research',
     category: 'AI & ML',
     year: '2024',
+    url: 'https://arxiv.org/',
     description: 'Empowering student scholars with ethical LLM literature review tools, semantic search engines, citation cross-examiners, and synthetic data validation frameworks.',
     tags: ['Literature Synthesis', 'Semantic Search', 'Ethical AI', 'Paper Review'],
     leadSpeaker: 'AI Faculty & Research Scholars'
@@ -405,6 +410,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Introduction to Blockchain: Solidity Workshop',
     category: 'Development',
     year: '2024',
+    url: 'https://soliditylang.org/',
     description: 'Building decentralized applications on Ethereum: smart contract syntax, ERC-20 tokenomics, Hardhat testing environments, and gas optimization techniques.',
     tags: ['Solidity', 'Ethereum EVM', 'Hardhat', 'Smart Contracts'],
     leadSpeaker: 'Web3 Developer Collective'
@@ -415,6 +421,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Star UML',
     category: 'Tools & Systems',
     year: '2024',
+    url: 'https://staruml.io/',
     description: 'Practical architectural blueprinting using Star UML: class diagrams, sequence flows, use-case modeling, state machine diagrams, and enterprise software documentation.',
     tags: ['UML Modeling', 'Software Architecture', 'Sequence Flows', 'OOAD'],
     leadSpeaker: 'Software Engineering Faculty'
@@ -425,6 +432,7 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Generative AI: Custom Solutions using OpenAI',
     category: 'AI & ML',
     year: '2024',
+    url: 'https://platform.openai.com/docs/',
     description: 'End-to-end tutorial on crafting context-aware enterprise copilots, utilizing function calling, streaming APIs, embedding vector databases, and Retrieval-Augmented Generation (RAG).',
     tags: ['OpenAI APIs', 'Vector Embeddings', 'RAG Architecture', 'Function Calling'],
     leadSpeaker: 'CIPHER AI Lead'
@@ -435,31 +443,86 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'React.js and Node.js Workshop',
     category: 'Development',
     year: '2024',
+    url: 'https://react.dev/',
     description: 'Hands-on full-stack bootcamp building a live real-time task manager: React state and hooks, Tailwind styling, Express REST endpoints, JWT auth, and MongoDB models.',
     tags: ['React 18', 'Node.js', 'Express', 'JWT Authentication', 'REST APIs'],
     leadSpeaker: 'Full-Stack Student Mentors'
   }
-]
+];
 
-export const GALLERY_COLLAGE_IMAGES = [
+export interface GalleryCollageItem {
+  id: number;
+  url: string;
+  fallbackUrl: string;
+  title: string;
+  subtitle: string;
+  tag: string;
+  positionName: 'upper-left' | 'upper-right' | 'left' | 'right' | 'lower-left' | 'lower-right' | 'bottom';
+}
+
+export const GALLERY_COLLAGE_IMAGES: GalleryCollageItem[] = [
   {
-    url: '/images/cipher1.JPG',
-    title: 'Department Coding Lab Hackathon',
-    subtitle: 'Hands-on sprint in computer labs'
+    id: 1,
+    url: '/images/20260325_141046.jpg',
+    fallbackUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80',
+    title: '',
+    subtitle: '',
+    tag: 'CSE LAB',
+    positionName: 'upper-left'
   },
   {
-    url: '/images/cipher2.JPG',
-    title: 'Kalam Auditorium Grand Assembly',
-    subtitle: 'Lumière gala and branch inauguration'
+    id: 2,
+    url: '/images/20260325_165226.jpg',
+    fallbackUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80',
+    title: '',
+    subtitle: '',
+    tag: 'PROMPT OPS',
+    positionName: 'upper-right'
   },
   {
-    url: '/images/cipher3.JPG',
-    title: 'PROMPT OPS-2K26 Competition',
-    subtitle: 'Prompt engineering & AI tools challenge'
+    id: 3,
+    url: '/images/IMG_7350.JPG',
+    fallbackUrl: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=800&q=80',
+    title: '',
+    subtitle: '',
+    tag: 'LUMIÈRE',
+    positionName: 'left'
   },
   {
-    url: '/images/cipher4.JPG',
-    title: 'Annual Student Assembly & Awards',
-    subtitle: 'Celebrating peer excellence in computing'
+    id: 4,
+    url: '/images/IMG_7354.JPG',
+    fallbackUrl: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=800&q=80',
+    title: '',
+    subtitle: '',
+    tag: 'LUMIÈRE',
+    positionName: 'right'
+  },
+  {
+    id: 5,
+    url: '/images/IMG_7369.JPG',
+    fallbackUrl: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80',
+    title: '',
+    subtitle: '',
+    tag: 'LUMIÈRE',
+    positionName: 'lower-left'
+  },
+  {
+    id: 6,
+    url: '/images/IMG_7388.JPG',
+    fallbackUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
+    title: '',
+    subtitle: '',
+    tag: 'LUMIÈRE',
+    positionName: 'lower-right'
+  },
+  {
+    id: 7,
+    url: '/images/IMG_7397.JPG',
+    fallbackUrl: 'https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=800&q=80',
+    title: '',
+    subtitle: '',
+    tag: 'LUMIÈRE',
+    positionName: 'bottom'
   }
 ];
+
