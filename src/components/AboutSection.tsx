@@ -12,6 +12,7 @@ import {
   Rocket,
   ArrowUpRight,
   CheckCircle2,
+  GripHorizontal,
 } from 'lucide-react';
 import { CIPHER_META, GALLERY_COLLAGE_IMAGES, DOMAINS } from '../data/cipherData';
 import { DomainItem } from '../types';
@@ -28,15 +29,9 @@ const ICON_MAP = {
 export const AboutSection: React.FC = () => {
   const headingText = useScrambleText('Who we are', true, 600, 10);
   const domainsHeading = useScrambleText('Our Domains', true, 700, 12);
-  const [selectedImage, setSelectedImage] = useState<{
-  url: string;
-  title: string;
-  subtitle: string;
-} | null>(null);
-
-const [selectedDomain, setSelectedDomain] = useState<DomainItem | null>(null);
-
-const [activeCard, setActiveCard] = useState(0);
+  const [selectedImage, setSelectedImage] = useState<{ url: string; title: string; subtitle: string } | null>(null);
+  const [selectedDomain, setSelectedDomain] = useState<DomainItem | null>(null);
+  const [activeCard, setActiveCard] = useState(0);
 
   const pillars = [
     {
@@ -57,10 +52,7 @@ const [activeCard, setActiveCard] = useState(0);
   ];
 
   return (
-    <section id="about" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-[#050806] border-t border-emerald-950/60 overflow-hidden font-mono">
-      {/* Background cyber grid */}
-      <div className="absolute inset-0 cyber-grid opacity-20 pointer-events-none" />
-
+    <section id="about" className="relative py-24 px-4 sm:px-6 lg:px-8 bg-transparent border-t border-emerald-950/60 overflow-hidden font-mono">
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* 1. Narrative & Visual Collage */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
@@ -115,121 +107,157 @@ const [activeCard, setActiveCard] = useState(0);
               CIPHER
             </div>
 
-            {/* Photo Collage Grid */}
-            {/* Throwing Cards Photo Stack */}
-{/* Throwing Cards Photo Stack */}
-<div className="relative z-10 h-[430px] sm:h-[500px] flex items-center justify-center">
+            {/* Throwing Cards Photo Stack with Full Grip */}
+            <div className="relative z-10 h-[430px] sm:h-[500px] flex items-center justify-center select-none">
+              {/* Glow behind cards */}
+              <div className="absolute w-[75%] h-[75%] bg-emerald-500/15 blur-3xl rounded-full pointer-events-none" />
 
-  {/* Glow behind cards */}
-  <div className="absolute w-[70%] h-[70%] bg-emerald-500/10 blur-3xl rounded-full pointer-events-none" />
+              {GALLERY_COLLAGE_IMAGES.map((img, i) => {
+                const total = GALLERY_COLLAGE_IMAGES.length;
+                // Makes the active card appear on top
+                const position = (i - activeCard + total) % total;
+                const rotations = [-6, 4, -3, 7, -5, 3];
 
-  {GALLERY_COLLAGE_IMAGES.map((img, i) => {
-    const total = GALLERY_COLLAGE_IMAGES.length;
+                return (
+                  <motion.div
+                    key={i}
+                    drag={position === 0 ? "x" : false}
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.25}
+                    onDragEnd={(_, info) => {
+                      if (position === 0) {
+                        if (Math.abs(info.offset.x) > 40 || Math.abs(info.velocity.x) > 200) {
+                          playCyberClick();
+                          setActiveCard((prev) => (prev + 1) % total);
+                        }
+                      }
+                    }}
+                    animate={{
+                      x:
+                        position === 0
+                          ? 0
+                          : position === 1
+                          ? 32
+                          : position === 2
+                          ? -32
+                          : 0,
 
-    // Makes the active card appear on top
-    const position = (i - activeCard + total) % total;
+                      y:
+                        position === 0
+                          ? 0
+                          : position === 1
+                          ? -8
+                          : position === 2
+                          ? 8
+                          : 0,
 
-    const rotations = [-6, 4, -3, 7, -5, 3];
+                      rotate:
+                        position === 0
+                          ? 0
+                          : rotations[i % rotations.length],
 
-    return (
-      <motion.div
-        key={i}
-        animate={{
-          x:
-            position === 0
-              ? 0
-              : position === 1
-              ? 35
-              : position === 2
-              ? -35
-              : 0,
+                      scale:
+                        position === 0
+                          ? 1
+                          : position === 1
+                          ? 0.96
+                          : position === 2
+                          ? 0.92
+                          : 0.88,
 
-          y:
-            position === 0
-              ? 0
-              : position === 1
-              ? -8
-              : position === 2
-              ? 8
-              : 0,
+                      opacity:
+                        position > 3
+                          ? 0
+                          : 1,
+                    }}
+                    transition={{
+                      duration: 0.45,
+                      type: "spring",
+                      stiffness: 140,
+                      damping: 16,
+                    }}
+                    onClick={() => {
+                      if (position === 0) {
+                        playCyberClick();
+                        setActiveCard((prev) => (prev + 1) % total);
+                      }
+                    }}
+                    className={`absolute w-[88%] sm:w-[78%] max-w-[520px] aspect-[4/3] ${
+                      position === 0 ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
+                    }`}
+                    style={{
+                      zIndex: total - position,
+                    }}
+                  >
+                    <div className="relative w-full h-full overflow-hidden rounded-xl border-2 border-emerald-500/80 bg-[#07120a] shadow-2xl shadow-black/90 group flex flex-col justify-between">
+                      {/* Full Grip Tactical Header Strip */}
+                      <div className="absolute top-0 inset-x-0 z-30 flex items-center justify-between px-3 py-1.5 bg-[#030a05]/95 border-b border-emerald-900/90 font-mono text-[10px] text-emerald-400 select-none pointer-events-none backdrop-blur-sm">
+                        <div className="flex items-center gap-1.5 font-bold tracking-wider">
+                          <GripHorizontal className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                          <span>FULL GRIP // SWIPEABLE</span>
+                        </div>
+                        <span className="text-[9px] text-emerald-600 tracking-widest uppercase">
+                          {position === 0 ? 'DRAG OR TAP TO FLICK' : 'IN STACK'}
+                        </span>
+                      </div>
 
-          rotate:
-            position === 0
-              ? 0
-              : rotations[i % rotations.length],
+                      {/* Side Tactile Grip Ridges (Left & Right) */}
+                      <div className="absolute left-1.5 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-1 p-1 rounded bg-black/80 border border-emerald-500/50 pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity">
+                        <span className="w-1 h-3 rounded-full bg-emerald-400" />
+                        <span className="w-1 h-3 rounded-full bg-emerald-400/60" />
+                        <span className="w-1 h-3 rounded-full bg-emerald-400/30" />
+                      </div>
+                      <div className="absolute right-1.5 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-1 p-1 rounded bg-black/80 border border-emerald-500/50 pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity">
+                        <span className="w-1 h-3 rounded-full bg-emerald-400" />
+                        <span className="w-1 h-3 rounded-full bg-emerald-400/60" />
+                        <span className="w-1 h-3 rounded-full bg-emerald-400/30" />
+                      </div>
 
-          scale:
-            position === 0
-              ? 1
-              : position === 1
-              ? 0.96
-              : position === 2
-              ? 0.92
-              : 0.88,
+                      {/* Image */}
+                      <img
+                        src={img.url}
+                        alt={img.title}
+                        className="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-500 pointer-events-none"
+                        loading="lazy"
+                      />
 
-          opacity:
-            position > 3
-              ? 0
-              : 1,
-        }}
-        transition={{
-          duration: 0.5,
-          type: "spring",
-          stiffness: 120,
-          damping: 15,
-        }}
-        onClick={() => {
-          if (position === 0) {
-            playCyberClick();
+                      {/* Green matrix overlay */}
+                      <div className="absolute inset-0 bg-emerald-950/20 group-hover:bg-transparent transition-colors duration-300 pointer-events-none" />
 
-            // Move current card to the back
-            setActiveCard((prev) => (prev + 1) % total);
-          }
-        }}
-        className="absolute w-[85%] sm:w-[75%] max-w-[520px] aspect-[4/3] cursor-pointer"
-        style={{
-          zIndex: total - position,
-        }}
-      >
-        <div className="relative w-full h-full overflow-hidden rounded-xl border-2 border-emerald-900/70 bg-[#07120a] shadow-2xl shadow-black/80">
+                      {/* Bottom information and grip handle */}
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4 pt-12 z-20 pointer-events-none">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[10px] font-mono font-bold tracking-wider text-emerald-400 flex items-center gap-1">
+                            <ZoomIn className="w-3 h-3" />
+                            {position === 0 ? 'CLICK OR DRAG' : 'VIEW SNAPSHOT'}
+                          </span>
+                          <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-800 px-2 py-0.5 rounded">
+                            {String(i + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
+                          </span>
+                        </div>
 
-          {/* Image */}
-          <img
-            src={img.url}
-            alt={img.title}
-            className="w-full h-full object-cover grayscale contrast-125 hover:grayscale-0 transition-all duration-500"
-            loading="lazy"
-          />
+                        <h4 className="text-sm sm:text-base font-semibold text-white truncate">
+                          {img.title}
+                        </h4>
 
-          {/* Green overlay */}
-          <div className="absolute inset-0 bg-emerald-950/20 hover:bg-transparent transition-colors duration-300" />
+                        {/* Knurled Bottom Grip Handle Strip */}
+                        <div className="mt-2 pt-1.5 border-t border-emerald-950 flex items-center justify-center gap-2 text-emerald-500 text-[9px] font-mono tracking-widest uppercase">
+                          <GripHorizontal className="w-3 h-3 text-emerald-400" />
+                          <span>FULL GRIP · DRAG TO THROW</span>
+                          <GripHorizontal className="w-3 h-3 text-emerald-400" />
+                        </div>
+                      </div>
 
-          {/* Bottom information */}
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-4 pt-12">
-
-            <span className="text-[10px] font-mono font-bold tracking-wider text-emerald-400 flex items-center gap-1">
-              <ZoomIn className="w-3 h-3" />
-              {position === 0 ? "CLICK TO NEXT" : "VIEW SNAPSHOT"}
-            </span>
-
-            <h4 className="text-sm sm:text-base font-semibold text-white mt-1">
-              {img.title}
-            </h4>
-
-          </div>
-
-          {/* Corner accents */}
-          <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-emerald-400/70" />
-          <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-emerald-400/70" />
-          <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-emerald-400/70" />
-          <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-emerald-400/70" />
-
-        </div>
-      </motion.div>
-    );
-  })}
-
-</div>
+                      {/* Corner accents */}
+                      <div className="absolute top-2 left-2 w-3.5 h-3.5 border-t-2 border-l-2 border-emerald-400/80 z-20 pointer-events-none" />
+                      <div className="absolute top-2 right-2 w-3.5 h-3.5 border-t-2 border-r-2 border-emerald-400/80 z-20 pointer-events-none" />
+                      <div className="absolute bottom-2 left-2 w-3.5 h-3.5 border-b-2 border-l-2 border-emerald-400/80 z-20 pointer-events-none" />
+                      <div className="absolute bottom-2 right-2 w-3.5 h-3.5 border-b-2 border-r-2 border-emerald-400/80 z-20 pointer-events-none" />
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
 
             {/* Floating Live Indicator Badge */}
             <div className="absolute -bottom-4 left-6 sm:left-12 z-20 px-3.5 py-1.5 bg-[#08150c] border border-emerald-600/80 rounded-full flex items-center gap-2 shadow-lg shadow-emerald-950/60 text-xs font-mono text-emerald-300">
@@ -274,11 +302,14 @@ const [activeCard, setActiveCard] = useState(0);
                   }}
                   className="relative group p-6 sm:p-8 bg-[#07120a]/80 hover:bg-[#09170d] border border-emerald-900/50 hover:border-emerald-500/80 rounded-xl transition-all duration-300 cursor-pointer shadow-lg shadow-black/40 hover:shadow-emerald-950/40 overflow-hidden flex flex-col justify-between"
                 >
-                  {/* Subtle corner tech crosshairs */}
-                  <div className="absolute top-2 left-2 w-2 h-2 border-t border-l border-emerald-800 group-hover:border-emerald-400 transition-colors" />
-                  <div className="absolute top-2 right-2 w-2 h-2 border-t border-r border-emerald-800 group-hover:border-emerald-400 transition-colors" />
-                  <div className="absolute bottom-2 left-2 w-2 h-2 border-b border-l border-emerald-800 group-hover:border-emerald-400 transition-colors" />
-                  <div className="absolute bottom-2 right-2 w-2 h-2 border-b border-r border-emerald-800 group-hover:border-emerald-400 transition-colors" />
+                  {/* Tactical Corner Grips */}
+                  <div className="absolute top-0 left-0 w-3.5 h-3.5 border-t-2 border-l-2 border-emerald-400/80 pointer-events-none group-hover:border-emerald-300 transition-colors" />
+                  <div className="absolute top-0 right-0 w-3.5 h-3.5 border-t-2 border-r-2 border-emerald-400/80 pointer-events-none group-hover:border-emerald-300 transition-colors" />
+                  <div className="absolute bottom-0 left-0 w-3.5 h-3.5 border-b-2 border-l-2 border-emerald-400/80 pointer-events-none group-hover:border-emerald-300 transition-colors" />
+                  <div className="absolute bottom-0 right-0 w-3.5 h-3.5 border-b-2 border-r-2 border-emerald-400/80 pointer-events-none group-hover:border-emerald-300 transition-colors" />
+
+                  {/* Tactical Top Grip Knurling Strip */}
+                  <div className="h-0.5 w-full bg-[repeating-linear-gradient(90deg,#10b981_0px,#10b981_3px,transparent_3px,transparent_6px)] opacity-40 group-hover:opacity-80 transition-opacity mb-4" />
 
                   {/* Top row: Icon and Sessions Count badge */}
                   <div>

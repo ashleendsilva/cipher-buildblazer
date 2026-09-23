@@ -14,13 +14,32 @@ import {
   User,
   Tag,
   BookOpen,
+  GripHorizontal,
+   ExternalLink,
 } from 'lucide-react';
-import { EVENTS, ARCHIVE_ITEMS } from '../data/cipherData';
+import { ARCHIVE_ITEMS } from '../data/cipherData';
 import { EventItem, ArchiveItem } from '../types';
 import { useScrambleText } from '../utils/scrambleText';
 import { playCyberClick } from '../utils/audio';
+import { getStoredEvents, getStoredActivities } from '../utils/storage';
 
 export const EventsSection: React.FC = () => {
+  const [events, setEvents] = useState<EventItem[]>(() => getStoredEvents());
+   const [activities, setActivities] = useState<ArchiveItem[]>(() => getStoredActivities());
+
+  // Listen for storage events from Admin Panel
+  useEffect(() => {
+    const handleUpdate = () => {
+      setEvents(getStoredEvents());
+    };
+    window.addEventListener('cipher_data_updated', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('cipher_data_updated', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
+
   const headingText = useScrambleText('Events & Workshops', true, 750, 12);
   const archiveHeadingText = useScrambleText('Activities', true, 700, 10);
 
@@ -97,15 +116,27 @@ export const EventsSection: React.FC = () => {
   }, [activeModalEvent]);
 
   const filteredArchiveItems = useMemo(() => {
-    return ARCHIVE_ITEMS.filter((item) => {
+    return activities.filter((item) => {
       const matchesCategory = selectedCategory === 'ALL' || item.category === selectedCategory;
       const matchesSearch =
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+         (item.url && item.url.toLowerCase().includes(searchQuery.toLowerCase()))
         item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesCategory && matchesSearch;
     });
-  }, [selectedCategory, searchQuery]);
+  }, [activities, selectedCategory, searchQuery]);
+
+  const handleActivityClick = (item: ArchiveItem) => {
+    playCyberClick();
+    if (item.url && item.url.trim() !== '') {
+      // If URL configured, open target webpage in new window/tab
+      window.open(item.url.trim(), '_blank', 'noopener,noreferrer');
+    } else {
+      // Fallback: open detailed intelligence dossier
+      setActiveArchiveItem(item);
+    }
+  };
 
   const openGallery = (event: EventItem) => {
     playCyberClick();
@@ -214,14 +245,23 @@ export const EventsSection: React.FC = () => {
           </p>
         </div>
 
-        {/* 2 Flagship Event Cards Grid */}
+        {/* Flagship Event Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 font-mono">
-          {EVENTS.map((item) => (
+          {events.map((item) => (
             <div
               key={item.id}
               onClick={() => openGallery(item)}
-              className="group relative p-6 sm:p-8 bg-[#06100a] border border-emerald-900/60 hover:border-emerald-500/80 rounded-xl transition-all duration-300 shadow-xl shadow-black/60 flex flex-col justify-between cursor-pointer active:scale-[0.99]"
+              className="group relative p-6 sm:p-8 bg-[#06100a] border border-emerald-900/60 hover:border-emerald-500/90 rounded-xl transition-all duration-300 shadow-xl shadow-black/60 flex flex-col justify-between cursor-pointer active:scale-[0.99] overflow-hidden"
             >
+              {/* Corner Grips (Military Cyber HUD Brackets) */}
+              <div className="absolute top-0 left-0 w-3.5 h-3.5 border-t-2 border-l-2 border-emerald-400/80 pointer-events-none group-hover:border-emerald-300 transition-colors" />
+              <div className="absolute top-0 right-0 w-3.5 h-3.5 border-t-2 border-r-2 border-emerald-400/80 pointer-events-none group-hover:border-emerald-300 transition-colors" />
+              <div className="absolute bottom-0 left-0 w-3.5 h-3.5 border-b-2 border-l-2 border-emerald-400/80 pointer-events-none group-hover:border-emerald-300 transition-colors" />
+              <div className="absolute bottom-0 right-0 w-3.5 h-3.5 border-b-2 border-r-2 border-emerald-400/80 pointer-events-none group-hover:border-emerald-300 transition-colors" />
+
+              {/* Tactical Top Grip Knurling Strip */}
+              <div className="h-1 w-full bg-[repeating-linear-gradient(90deg,#10b981_0px,#10b981_3px,transparent_3px,transparent_7px)] opacity-40 group-hover:opacity-80 transition-opacity mb-4" />
+
               <div>
                 {/* Badges Row */}
                 <div className="flex items-center justify-between gap-2 mb-4 text-xs font-semibold">
@@ -229,9 +269,15 @@ export const EventsSection: React.FC = () => {
                     <Sparkles className="w-3 h-3 text-emerald-400" />
                     {item.badge}
                   </span>
-                  <span className="px-2.5 py-1 rounded bg-[#040805] border border-emerald-900/80 text-emerald-500 font-mono">
-                    {item.dateStr}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="hidden sm:inline-flex items-center gap-1 text-[10px] text-emerald-600 font-mono">
+                      <GripHorizontal className="w-3 h-3 text-emerald-500" />
+                      <span>GRIP_ACCESS</span>
+                    </span>
+                    <span className="px-2.5 py-1 rounded bg-[#040805] border border-emerald-900/80 text-emerald-500 font-mono">
+                      {item.dateStr}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Title */}
@@ -347,10 +393,9 @@ export const EventsSection: React.FC = () => {
             {filteredArchiveItems.map((item) => (
               <div
                 key={item.id}
-                onClick={() => {
-                  playCyberClick();
-                  setActiveArchiveItem(item);
-                }}
+                onClick={() => handleActivityClick(item)}
+                title={item.url ? `Open external webpage: ${item.url}` : `View ${item.title}`}
+              
                 className="group relative p-4 sm:p-5 bg-[#07120a]/80 hover:bg-[#09170d] border border-emerald-900/50 hover:border-emerald-500/80 rounded-lg transition-all duration-200 cursor-pointer shadow-md hover:shadow-emerald-950/40 flex items-start justify-between gap-3"
               >
                 <div className="flex items-start gap-3 min-w-0">
@@ -358,9 +403,17 @@ export const EventsSection: React.FC = () => {
                     {item.num}
                   </span>
                   <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                     <h4 className="text-sm font-semibold text-emerald-100 group-hover:text-emerald-300 transition-colors truncate">
                       {item.title}
                     </h4>
+                     {item.url && (
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-950/90 border border-emerald-800/80 text-emerald-400 font-mono flex items-center gap-1 shrink-0">
+                          <span>LINK</span>
+                          <ExternalLink className="w-2.5 h-2.5" />
+                        </span>
+                      )}
+                    </div>
                     <p className="text-[11px] text-emerald-600 font-sans truncate mt-0.5">
                       {item.tags.join(' • ')}
                     </p>
@@ -368,7 +421,11 @@ export const EventsSection: React.FC = () => {
                 </div>
 
                 <div className="w-6 h-6 rounded bg-emerald-950/40 border border-emerald-900 flex items-center justify-center text-emerald-500 group-hover:text-emerald-300 group-hover:border-emerald-500 shrink-0 transition-colors">
-                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  {item.url ? (
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  ) : (
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  )}
                 </div>
               </div>
             ))}
@@ -489,9 +546,20 @@ export const EventsSection: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Right Column: Framed Card with Fun Image Changing */}
+                  {/* Right Column: Framed Card with Fun Image Changing & Full Grip */}
                   <div className="lg:col-span-5 flex flex-col items-center w-full order-1 lg:order-2">
                     <div className="w-full max-w-[340px] sm:max-w-[380px] bg-[#040805] border-2 border-emerald-500 rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(34,197,94,0.35)] flex flex-col mx-auto">
+                      {/* Full Grip Tactical Header Strip */}
+                      <div className="flex items-center justify-between px-3 py-1.5 bg-[#030a05] border-b border-emerald-900/90 font-mono text-[10px] text-emerald-400 select-none">
+                        <div className="flex items-center gap-1.5 text-emerald-400 font-bold tracking-wider">
+                          <GripHorizontal className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                          <span>FULL GRIP // SWIPEABLE</span>
+                        </div>
+                        <span className="text-[9px] text-emerald-600 tracking-widest uppercase">
+                          DRAG · FLICK · TAP
+                        </span>
+                      </div>
+
                       {/* Top bar inside card */}
                       <div className="flex items-center justify-between px-3.5 py-2 sm:px-4 sm:py-2.5 bg-[#061009] border-b border-emerald-900/70 font-mono text-[11px] sm:text-xs text-emerald-400 font-bold">
                         <span className="tracking-wide truncate max-w-[200px]">
@@ -502,15 +570,37 @@ export const EventsSection: React.FC = () => {
                         </span>
                       </div>
 
-                      {/* Fun Interactive Image Frame */}
-                      <div
+                      {/* Fun Interactive Image Frame with Full Drag Grip */}
+                      <motion.div
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={0.25}
+                        onDragEnd={(_, info) => {
+                          if (info.offset.x < -40 || info.velocity.x < -200) {
+                            nextPhoto();
+                          } else if (info.offset.x > 40 || info.velocity.x > 200) {
+                            prevPhoto();
+                          }
+                        }}
                         onClick={triggerFunChange}
                         onTouchStart={handleTouchStart}
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
-                        className="relative aspect-[4/5] sm:aspect-[3/4] w-full max-h-[46vh] sm:max-h-none overflow-hidden bg-[#020503] cursor-pointer select-none group flex items-center justify-center touch-pan-y"
-                        title="Click or tap image to change photo with fun animation!"
+                        className="relative aspect-[4/5] sm:aspect-[3/4] w-full max-h-[46vh] sm:max-h-none overflow-hidden bg-[#020503] cursor-grab active:cursor-grabbing select-none group flex items-center justify-center touch-pan-y"
+                        title="Click or drag with full grip to change photo!"
                       >
+                        {/* Side Tactile Grip Ridges (Left & Right) */}
+                        <div className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-1 p-1 rounded bg-black/75 border border-emerald-500/40 pointer-events-none opacity-70 group-hover:opacity-100 transition-opacity">
+                          <span className="w-1 h-3 rounded-full bg-emerald-400" />
+                          <span className="w-1 h-3 rounded-full bg-emerald-400/60" />
+                          <span className="w-1 h-3 rounded-full bg-emerald-400/30" />
+                        </div>
+                        <div className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-1 p-1 rounded bg-black/75 border border-emerald-500/40 pointer-events-none opacity-70 group-hover:opacity-100 transition-opacity">
+                          <span className="w-1 h-3 rounded-full bg-emerald-400" />
+                          <span className="w-1 h-3 rounded-full bg-emerald-400/60" />
+                          <span className="w-1 h-3 rounded-full bg-emerald-400/30" />
+                        </div>
+
                         {/* Laser scanline sweep on change */}
                         <AnimatePresence>
                           <motion.div
@@ -541,7 +631,7 @@ export const EventsSection: React.FC = () => {
                         {/* Click to change tooltip badge */}
                         <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-20 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-black/85 border border-emerald-500/80 text-[9px] sm:text-[10px] text-emerald-300 font-mono flex items-center gap-1 opacity-90 sm:opacity-80 group-hover:opacity-100 group-hover:border-emerald-300 group-hover:scale-105 transition-all shadow-md pointer-events-none">
                           <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-400 animate-pulse" />
-                          <span>TAP TO SHUFFLE</span>
+                          <span>TAP OR GRIP</span>
                         </div>
 
                         {/* Animated Image */}
@@ -570,6 +660,13 @@ export const EventsSection: React.FC = () => {
                             {activeModalEvent.badge} · {activeModalEvent.venue}
                           </div>
                         </div>
+                      </motion.div>
+
+                      {/* Full Grip Lower Handle Strip */}
+                      <div className="w-full py-1 bg-[#051108] border-t border-emerald-950 flex items-center justify-center gap-2 text-emerald-500 text-[10px] font-mono select-none cursor-grab active:cursor-grabbing">
+                        <GripHorizontal className="w-3.5 h-3.5 text-emerald-400" />
+                        <span className="tracking-widest font-semibold uppercase text-[9px]">FULL GRIP · DRAG TO CYCLE</span>
+                        <GripHorizontal className="w-3.5 h-3.5 text-emerald-400" />
                       </div>
                     </div>
 
@@ -701,6 +798,25 @@ export const EventsSection: React.FC = () => {
                     ))}
                   </div>
                 </div>
+
+                 {/* External Destination Webpage Link */}
+                {activeArchiveItem.url && (
+                  <div className="mt-5 p-3 rounded-lg bg-[#040a06] border border-emerald-800/80 flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-[10px] text-emerald-500 font-bold uppercase">External Webpage Destination</div>
+                      <div className="text-xs text-emerald-300 truncate font-mono">{activeArchiveItem.url}</div>
+                    </div>
+                    <a
+                      href={activeArchiveItem.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 bg-emerald-400 hover:bg-emerald-300 text-black text-xs font-bold rounded flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer"
+                    >
+                      <span>OPEN LINK</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                )}
 
                 <div className="mt-6 pt-4 border-t border-emerald-900/80 flex items-center justify-between">
                   <span className="text-[11px] text-emerald-700">ARCHIVE RECORD ID: CIPHER_{activeArchiveItem.num}</span>
