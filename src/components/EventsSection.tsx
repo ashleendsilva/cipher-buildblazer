@@ -9,6 +9,7 @@ import {
   Trophy,
   Sparkles,
   ArrowUpRight,
+  Search,
 } from 'lucide-react';
 import { EventItem } from '../types';
 import { useScrambleText } from '../utils/scrambleText';
@@ -18,18 +19,32 @@ interface ActivityItem {
   id: string;
   name: string;
   url: string;
+  category: string;
 }
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export const EventsSection: React.FC = () => {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
+
+  const activityCategories = [
+    'ALL',
+    'AI & ML',
+    'Development',
+    'Tools & Systems',
+    'Industry & Career',
+    'Academic & Grants',
+  ];
 
   useEffect(() => {
     const fetchContent = async () => {
       try {
         const [eventsResponse, activitiesResponse] = await Promise.all([
-          fetch('http://localhost:5000/api/events'),
-          fetch('http://localhost:5000/api/activities'),
+          fetch(`${API_BASE_URL}/api/events`),
+          fetch(`${API_BASE_URL}/api/activities`),
         ]);
 
         if (!eventsResponse.ok || !activitiesResponse.ok) {
@@ -51,6 +66,20 @@ export const EventsSection: React.FC = () => {
 
   const headingText = useScrambleText('Events & Workshops', true, 750, 12);
   const archiveHeadingText = useScrambleText('Activities', true, 700, 10);
+
+  const filteredActivities = activities.filter((activity) => {
+    const query = searchQuery.trim().toLowerCase();
+
+    const matchesCategory =
+      selectedCategory === 'ALL' || activity.category === selectedCategory;
+
+    const matchesSearch =
+      query === '' ||
+      activity.name.toLowerCase().includes(query) ||
+      activity.category.toLowerCase().includes(query);
+
+    return matchesCategory && matchesSearch;
+  });
 
   // Event Gallery Modal State
   const [activeModalEvent, setActiveModalEvent] = useState<EventItem | null>(null);
@@ -361,7 +390,7 @@ export const EventsSection: React.FC = () => {
               <span>{archiveHeadingText}</span>
 
               <span className="text-xs font-normal text-emerald-400 bg-emerald-950/80 border border-emerald-800/80 px-2.5 py-1 rounded">
-                17+ SESSIONS DOCUMENTED
+                {activities.length} SESSIONS DOCUMENTED
               </span>
             </h3>
 
@@ -372,9 +401,58 @@ export const EventsSection: React.FC = () => {
             </p>
           </div>
 
+          {/* ACTIVITY SEARCH & CATEGORY FILTER */}
+          <div className="mb-8 flex flex-col xl:flex-row items-stretch xl:items-center gap-3">
+            {/* Search Bar */}
+            <div className="relative w-full xl:flex-1 xl:min-w-[280px]">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-emerald-500" />
+
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="SEARCH ACTIVITIES..."
+                aria-label="Search activities"
+                className="w-full h-[52px] pl-11 pr-4 bg-[#06100a] border border-emerald-900/70 rounded-lg text-sm text-emerald-100 placeholder:text-emerald-600 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 font-mono tracking-wide transition-all"
+              />
+
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Clear activity search"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-600 hover:text-emerald-300 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Category Selection */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 xl:pb-0 xl:flex-nowrap scrollbar-none">
+              {activityCategories.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => {
+                    playCyberClick();
+                    setSelectedCategory(category);
+                  }}
+                  className={`h-[52px] px-4 rounded-lg text-[11px] font-semibold font-mono tracking-wide whitespace-nowrap border transition-all duration-200 cursor-pointer ${
+                    selectedCategory === category
+                      ? 'bg-emerald-500 text-black border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.25)]'
+                      : 'bg-[#07120a]/80 text-emerald-400 border-emerald-900/70 hover:border-emerald-500 hover:text-emerald-200 hover:bg-[#09170d]'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* ACTIVITIES GRID */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 font-mono">
-            {activities.map((activity, index) => (
+            {filteredActivities.map((activity, index) => (
               <a
                 key={activity.id}
                 href={activity.url}
@@ -393,6 +471,9 @@ export const EventsSection: React.FC = () => {
                     <h4 className="text-sm font-semibold text-emerald-100 group-hover:text-emerald-300 transition-colors">
                       {activity.name}
                     </h4>
+                    <span className="inline-block mt-1 text-[10px] px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-800/80 text-emerald-500">
+                      {activity.category}
+                    </span>
                   </div>
                 </div>
 
@@ -407,6 +488,12 @@ export const EventsSection: React.FC = () => {
           {activities.length === 0 && (
             <div className="text-center py-12 text-emerald-600 font-mono text-xs">
               &gt; NO ACTIVITIES AVAILABLE
+            </div>
+          )}
+
+          {activities.length > 0 && filteredActivities.length === 0 && (
+            <div className="text-center py-12 text-emerald-600 font-mono text-xs">
+              &gt; NO ACTIVITIES MATCH YOUR FILTER
             </div>
           )}
         </div>

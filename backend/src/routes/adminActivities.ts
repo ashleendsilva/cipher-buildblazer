@@ -6,8 +6,9 @@ import { requireAdmin } from "../middleware/requireAdmin.js";
 const router = Router();
 
 const activitySchema = z.object({
-  name: z.string().min(1).max(200),
-  url: z.string().url().max(1000),
+  name: z.string().trim().min(1).max(200),
+  url: z.string().trim().url().max(1000),
+  category: z.string().trim().min(1).max(100),
 });
 
 // CREATE
@@ -26,11 +27,11 @@ router.post("/", requireAdmin, async (req, res) => {
       data: result.data,
     });
 
-    res.status(201).json(activity);
+    return res.status(201).json(activity);
   } catch (error) {
-    console.error(error);
+    console.error("Failed to create activity:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
       error: "Failed to create activity",
     });
   }
@@ -55,11 +56,11 @@ router.patch("/:id", requireAdmin, async (req, res) => {
       data: result.data,
     });
 
-    res.json(activity);
+    return res.json(activity);
   } catch (error) {
-    console.error(error);
+    console.error("Failed to update activity:", error);
 
-    res.status(404).json({
+    return res.status(404).json({
       error: "Activity not found",
     });
   }
@@ -74,13 +75,13 @@ router.delete("/:id", requireAdmin, async (req, res) => {
       },
     });
 
-    res.json({
+    return res.json({
       message: "Activity deleted successfully",
     });
   } catch (error) {
-    console.error(error);
+    console.error("Failed to delete activity:", error);
 
-    res.status(404).json({
+    return res.status(404).json({
       error: "Activity not found",
     });
   }
