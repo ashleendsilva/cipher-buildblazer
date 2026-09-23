@@ -6,29 +6,52 @@ import {
   Megaphone,
   ArrowLeft,
   LogOut,
-   BookOpen,
+  BookOpen,
 } from 'lucide-react';
+
 import { MembersTab } from './MembersTab';
 import { EventsTab } from './EventsTab';
 import { LeadersTab } from './LeadersTab';
 import { ActivitiesTab } from './ActivitiesTab';
 import { AnnouncementTab } from './AnnouncementTab';
 import { AdminAuthModal } from './AdminAuthModal';
+
 import { playCyberClick } from '../../utils/audio';
-import { getStoredMembers, getStoredEvents, getStoredActivities } from '../../utils/storage';
+import { getStoredMembers } from '../../utils/storage';
 
 interface AdminPanelProps {
   onExit: () => void;
   onLogout?: () => void;
 }
-type TabType = 'events' | 'activities' | 'members' | 'leaders' | 'announcements';
 
+type TabType =
+  | 'events'
+  | 'activities'
+  | 'members'
+  | 'leaders'
+  | 'announcements';
 
-export const AdminPanel: React.FC<AdminPanelProps> = ({ onExit, onLogout }) => {
-  // Always require password authentication login screen when accessing admin
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const getAdminToken = (): string | null => {
+  if (typeof window === 'undefined') return null;
+
+  return (
+    sessionStorage.getItem('cipher_admin_token') ||
+    localStorage.getItem('cipher_admin_token')
+  );
+};
+
+export const AdminPanel: React.FC<AdminPanelProps> = ({
+  onExit,
+  onLogout,
+}) => {
+  // Always require password authentication when accessing admin
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     try {
       if (typeof window === 'undefined') return false;
+
       return (
         sessionStorage.getItem('cipher_admin_session') === 'true' ||
         localStorage.getItem('cipher_admin_auth') === 'true'
@@ -39,55 +62,193 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onExit, onLogout }) => {
   });
 
   const [activeTab, setActiveTab] = useState<TabType>('activities');
-  const [membersCount, setMembersCount] = useState<number>(() => getStoredMembers().length);
-  const [eventsCount, setEventsCount] = useState<number>(() => getStoredEvents().length);
-  const [activitiesCount, setActivitiesCount] = useState<number>(() => getStoredActivities().length);
 
-  // Sync member and event counts
+  const [membersCount, setMembersCount] = useState<number>(0);
+  const [eventsCount, setEventsCount] = useState<number>(0);
+  const [activitiesCount, setActivitiesCount] = useState<number>(0);
+
+  // ------------------------------------------------------------
+  // LOAD COUNTS FROM BACKEND
+  // ------------------------------------------------------------
+
   useEffect(() => {
-    const updateCounts = () => {
-      const mems = getStoredMembers();
-      const evts = getStoredEvents();
-      const acts = getStoredActivities();
-      setMembersCount(mems.length);
-      setEventsCount(evts.length);
-      setActivitiesCount(acts.length);
+    const updateCounts = async () => {
+      // ----------------------------------------------------------
+      // MEMBERS
+      // ----------------------------------------------------------
+
+      const token = getAdminToken();
+
+      if (!token) {
+        setEventsCount(0);
+        setMembersCount(getStoredMembers().length);
+        setActivitiesCount(0);
+        return;
+      }
+
+      // ----------------------------------------------------------
+      // EVENTS
+      // ----------------------------------------------------------
+
+      try {
+        const eventsResponse = await fetch(
+          `${API_BASE_URL}/api/admin/events`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!eventsResponse.ok) {
+          throw new Error('Failed to fetch events');
+        }
+
+        const events = await eventsResponse.json();
+
+        setEventsCount(Array.isArray(events) ? events.length : 0);
+      } catch (error) {
+        console.error('Failed to fetch events count:', error);
+        setEventsCount(0);
+      }
+
+      // ----------------------------------------------------------
+      // ACTIVITIES
+      // ----------------------------------------------------------
+
+      try {
+        const activitiesResponse = await fetch(
+          `${API_BASE_URL}/api/activities`
+        );
+
+        if (!activitiesResponse.ok) {
+          throw new Error('Failed to fetch activities');
+        }
+
+        const activities = await activitiesResponse.json();
+
+        setActivitiesCount(
+          Array.isArray(activities) ? activities.length : 0
+        );
+      } catch (error) {
+        console.error('Failed to fetch activities count:', error);
+        setActivitiesCount(0);
+      }
+
+      // ----------------------------------------------------------
+      // MEMBERS / APPLICATIONS
+      // ----------------------------------------------------------
+
+      try {
+        const membersResponse = await fetch(
+          `${API_BASE_URL}/api/applications`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!membersResponse.ok) {
+          throw new Error('Failed to fetch applications');
+        }
+
+        const applications = await membersResponse.json();
+
+        setMembersCount(
+          Array.isArray(applications) ? applications.length : 0
+        );
+      } catch (error) {
+        console.error('Failed to fetch members count:', error);
+        setMembersCount(0);
+      }
     };
 
-    updateCounts();
-    window.addEventListener('cipher_data_updated', updateCounts);
-    return () => window.removeEventListener('cipher_data_updated', updateCounts);
-  }, []);
+    if (isAuthenticated) {
+      updateCounts();
+    }
+
+    // Listen for updates from admin tabs
+    const handleDataUpdated = (event: Event) => {
+      const customEvent =
+        event as CustomEvent<{ type?: string }>;
+
+      const type = customEvent.detail?.type;
+
+      if (
+        !type ||
+        type === 'events' ||
+        type === 'activities' ||
+        type === 'members'
+      ) {
+        updateCounts();
+      }
+    };
+
+    window.addEventListener(
+      'cipher_data_updated',
+      handleDataUpdated
+    );
+
+    return () => {
+      window.removeEventListener(
+        'cipher_data_updated',
+        handleDataUpdated
+      );
+    };
+  }, [isAuthenticated, activeTab]);
+
+  // ------------------------------------------------------------
+  // EXIT ADMIN PANEL
+  // ------------------------------------------------------------
 
   const handleExit = () => {
     playCyberClick();
+
     if (typeof window !== 'undefined') {
       try {
         if (window.history?.pushState) {
           window.history.pushState({}, '', '/');
         }
+
         window.location.hash = '';
       } catch {
         // ignore
       }
     }
+
     onExit();
   };
 
+  // ------------------------------------------------------------
+  // LOGOUT
+  // ------------------------------------------------------------
+
   const handleLogout = () => {
     playCyberClick();
+
     try {
       sessionStorage.setItem('cipher_admin_locked', 'true');
+
       sessionStorage.removeItem('cipher_admin_session');
       localStorage.removeItem('cipher_admin_auth');
+
+      sessionStorage.removeItem('cipher_admin_token');
+      localStorage.removeItem('cipher_admin_token');
     } catch {
       // ignore
     }
+
     setIsAuthenticated(false);
+
     if (onLogout) {
       onLogout();
     }
   };
+
+  // ------------------------------------------------------------
+  // AUTH SCREEN
+  // ------------------------------------------------------------
 
   if (!isAuthenticated) {
     return (
@@ -95,10 +256,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onExit, onLogout }) => {
         onSuccess={() => {
           try {
             sessionStorage.removeItem('cipher_admin_locked');
-            sessionStorage.setItem('cipher_admin_session', 'true');
+            sessionStorage.setItem(
+              'cipher_admin_session',
+              'true'
+            );
           } catch {
             // ignore
           }
+
           setIsAuthenticated(true);
         }}
         onCancel={handleExit}
@@ -106,12 +271,19 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onExit, onLogout }) => {
     );
   }
 
+  // ------------------------------------------------------------
+  // ADMIN PANEL
+  // ------------------------------------------------------------
+
   return (
     <div className="min-h-screen bg-[#070d09] text-emerald-100 font-mono flex flex-col selection:bg-emerald-500 selection:text-black">
-      {/* Top Admin Header matching user's photo */}
+      {/* ========================================================
+          TOP ADMIN HEADER
+      ======================================================== */}
+
       <header className="border-b border-emerald-950/90 bg-[#060c08] px-4 sm:px-8 py-3.5">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          {/* Left: Back Arrow + Brand + Level-0 Auth + Node info */}
+          {/* Left: Back Arrow + Brand */}
           <div className="flex items-start gap-3">
             <button
               onClick={handleExit}
@@ -124,9 +296,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onExit, onLogout }) => {
             <div>
               <div className="flex items-center gap-2.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" />
+
                 <h1 className="font-bold text-sm sm:text-base text-white tracking-wider">
                   CIPHER // ROOT COMMAND CONSOLE
                 </h1>
+
                 <span className="px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
                   LEVEL-0 AUTH
                 </span>
@@ -134,7 +308,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onExit, onLogout }) => {
             </div>
           </div>
 
-          {/* Right: Public Site button + Lock Console button */}
+          {/* Right: Public Site + Lock Console */}
           <div className="flex items-center gap-3">
             <button
               onClick={handleExit}
@@ -155,10 +329,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onExit, onLogout }) => {
         </div>
       </header>
 
-      {/* Admin Tab Navigation Bar (exactly like user screenshot) */}
+      {/* ========================================================
+          ADMIN TAB NAVIGATION
+      ======================================================== */}
+
       <nav className="border-b border-emerald-950/80 bg-[#060b07] px-4 sm:px-8 py-2.5">
         <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto scrollbar-none">
-          {/* Events & Summits Tab */}
+
+          {/* EVENTS */}
           <button
             onClick={() => {
               playCyberClick();
@@ -171,16 +349,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onExit, onLogout }) => {
             }`}
           >
             <Calendar className="w-3.5 h-3.5" />
+
             <span>Events &amp; Summits</span>
+
             <span
               className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                activeTab === 'events' ? 'bg-black text-emerald-400' : 'text-emerald-400'
+                activeTab === 'events'
+                  ? 'bg-black text-emerald-400'
+                  : 'text-emerald-400'
               }`}
             >
               {eventsCount}
             </span>
           </button>
-     {/* Activities Tab (with external links & edit capabilities) */}
+
+          {/* ACTIVITIES */}
           <button
             onClick={() => {
               playCyberClick();
@@ -193,16 +376,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onExit, onLogout }) => {
             }`}
           >
             <BookOpen className="w-3.5 h-3.5" />
+
             <span>Activities</span>
+
             <span
               className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                activeTab === 'activities' ? 'bg-black text-emerald-400' : 'text-emerald-400'
+                activeTab === 'activities'
+                  ? 'bg-black text-emerald-400'
+                  : 'text-emerald-400'
               }`}
             >
               {activitiesCount}
             </span>
           </button>
-          {/* Joined Members Tab (active style matching Image 1) */}
+
+          {/* JOINED MEMBERS */}
           <button
             onClick={() => {
               playCyberClick();
@@ -215,17 +403,21 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onExit, onLogout }) => {
             }`}
           >
             <Users className="w-3.5 h-3.5" />
+
             <span>Joined Members</span>
+
             <span
               className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                activeTab === 'members' ? 'bg-black text-emerald-400' : 'text-emerald-400'
+                activeTab === 'members'
+                  ? 'bg-black text-emerald-400'
+                  : 'text-emerald-400'
               }`}
             >
               {membersCount}
             </span>
           </button>
 
-          {/* Leadership Roster Tab (active style matching Image 2) */}
+          {/* LEADERSHIP */}
           <button
             onClick={() => {
               playCyberClick();
@@ -238,10 +430,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onExit, onLogout }) => {
             }`}
           >
             <User className="w-3.5 h-3.5" />
+
             <span>Leadership Roster</span>
           </button>
 
-          {/* Campus Broadcast Tab */}
+          {/* ANNOUNCEMENTS */}
           <button
             onClick={() => {
               playCyberClick();
@@ -254,20 +447,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onExit, onLogout }) => {
             }`}
           >
             <Megaphone className="w-3.5 h-3.5" />
+
             <span>Campus Broadcast</span>
           </button>
         </div>
       </nav>
 
-      {/* Main Tab Content */}
+      {/* ========================================================
+          MAIN TAB CONTENT
+      ======================================================== */}
+
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
         {activeTab === 'activities' && <ActivitiesTab />}
+
         {activeTab === 'members' && <MembersTab />}
+
         {activeTab === 'events' && <EventsTab />}
+
         {activeTab === 'leaders' && <LeadersTab />}
+
         {activeTab === 'announcements' && <AnnouncementTab />}
       </main>
     </div>
   );
 };
-

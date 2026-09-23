@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Shield,
   Plus,
@@ -13,31 +13,20 @@ import {
   Check,
 } from 'lucide-react';
 import { Leader } from '../../types';
-import {
-  getStoredLeaders,
-  addStoredLeader,
-  updateStoredLeader,
-  deleteStoredLeader,
-  resetStoredLeaders,
-} from '../../utils/storage';
 import { playCyberClick, playAccessGranted } from '../../utils/audio';
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+const getAdminToken = () =>
+  sessionStorage.getItem('cipher_admin_token') ||
+  localStorage.getItem('cipher_admin_token');
+
 export const LeadersTab: React.FC = () => {
-  const [leaders, setLeaders] = useState<Leader[]>(() => getStoredLeaders());
+  const [leaders, setLeaders] = useState<Leader[]>([]);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLeaderId, setEditingLeaderId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const handleSync = (e: Event) => {
-      const customEvent = e as unknown as { detail?: { type?: string } };
-      if (!customEvent?.detail || customEvent.detail.type === 'leaders') {
-        setLeaders(getStoredLeaders());
-      }
-    };
-    window.addEventListener('cipher_data_updated', handleSync);
-    return () => window.removeEventListener('cipher_data_updated', handleSync);
-  }, []);
 
   // Form State
   const [name, setName] = useState('');
@@ -47,28 +36,46 @@ export const LeadersTab: React.FC = () => {
   const [github, setGithub] = useState('');
   const [linkedin, setLinkedin] = useState('');
   const [email, setEmail] = useState('');
-  const [category, setCategory] = useState<'executive' | 'faculty' | 'core'>('core');
+  const [category, setCategory] =
+    useState<'executive' | 'faculty' | 'core'>('core');
 
-  // File Upload State
+  // Upload State
   const [isDragging, setIsDragging] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showUrlInput, setShowUrlInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const refreshLeaders = () => {
-    setLeaders(getStoredLeaders());
+  const fetchLeaders = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/team`);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch leadership roster');
+      }
+
+      const data = await response.json();
+
+      setLeaders(data);
+    } catch (error) {
+      console.error('Failed to load leadership roster:', error);
+    }
   };
+
+  useEffect(() => {
+    fetchLeaders();
+  }, []);
 
   const handleOpenAdd = () => {
     playCyberClick();
+
     setEditingLeaderId(null);
     setName('');
     setRole('CORE TECHNICAL LEAD');
     setCategory('core');
-    setImage('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800');
+    setImage('');
     setBio('');
-    setGithub('https://github.com');
-    setLinkedin('https://linkedin.com');
+    setGithub('');
+    setLinkedin('');
     setEmail('');
     setUploadError(null);
     setShowUrlInput(false);
@@ -77,11 +84,18 @@ export const LeadersTab: React.FC = () => {
 
   const handleOpenEdit = (leader: Leader) => {
     playCyberClick();
+
     setEditingLeaderId(leader.id);
     setName(leader.name);
     setRole(leader.role);
-    setCategory(leader.category || 'core');
-    setImage(leader.image);
+    setCategory(
+      leader.category === 'executive' ||
+        leader.category === 'faculty' ||
+        leader.category === 'core'
+        ? leader.category
+        : 'core'
+    );
+    setImage(leader.image || '');
     setBio(leader.bio || '');
     setGithub(leader.github || '');
     setLinkedin(leader.linkedin || '');
@@ -91,26 +105,75 @@ export const LeadersTab: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleDelete = (id: string, leaderName: string) => {
-    if (window.confirm(`Are you sure you want to remove ${leaderName} from the leadership roster?`)) {
-      playCyberClick();
-      deleteStoredLeader(id);
-      refreshLeaders();
+  const handleDelete = async (id: string, leaderName: string) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to remove ${leaderName} from the leadership roster?`
+      )
+    ) {
+      return;
+    }
+
+    playCyberClick();
+
+    try {
+      const token = getAdminToken();
+
+      if (!token) {
+        alert('Admin authentication expired. Please log in again.');
+        return;
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/admin/team/${id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+
+        throw new Error(
+          data?.error || 'Failed to delete leadership member'
+        );
+      }
+
+      await fetchLeaders();
+    } catch (error) {
+      console.error('Failed to delete leader:', error);
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Failed to delete leadership member.'
+      );
     }
   };
 
-  const handleResetDefaults = () => {
-    if (window.confirm('Reset leadership roster back to standard CIPHER directory?')) {
-      playCyberClick();
-      resetStoredLeaders();
-      refreshLeaders();
+  const handleResetDefaults = async () => {
+    if (
+      !window.confirm(
+        'Reload the leadership roster from the database?'
+      )
+    ) {
+      return;
     }
+
+    playCyberClick();
+
+    await fetchLeaders();
   };
 
-  // Image format validator (JPEG, SVG, PNG)
+  // Image format validator
   const isImageFormatValid = (urlOrStr: string): boolean => {
     if (!urlOrStr.trim()) return false;
+
     const clean = urlOrStr.trim().toLowerCase();
+
     if (
       clean.startsWith('data:image/jpeg') ||
       clean.startsWith('data:image/jpg') ||
@@ -119,7 +182,9 @@ export const LeadersTab: React.FC = () => {
     ) {
       return true;
     }
+
     const path = clean.split('?')[0].split('#')[0];
+
     return (
       path.endsWith('.jpeg') ||
       path.endsWith('.jpg') ||
@@ -132,11 +197,12 @@ export const LeadersTab: React.FC = () => {
     );
   };
 
-  // Image File Upload and Client-side Canvas Downscaling
+  // Image file upload
   const handleImageFile = (file: File) => {
     if (!file) return;
 
     const ext = file.name.split('.').pop()?.toLowerCase();
+
     const isAllowed =
       file.type === 'image/jpeg' ||
       file.type === 'image/jpg' ||
@@ -145,25 +211,39 @@ export const LeadersTab: React.FC = () => {
       ['jpg', 'jpeg', 'png', 'svg'].includes(ext || '');
 
     if (!isAllowed) {
-      setUploadError('Invalid format. Image URL / file must be in JPEG (.jpg/.jpeg), SVG (.svg), or PNG (.png) format.');
+      setUploadError(
+        'Invalid format. Use JPEG (.jpg/.jpeg), SVG (.svg), or PNG (.png).'
+      );
       return;
     }
+
+    // Prevent extremely large uploads
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError('Image must be smaller than 5 MB.');
+      return;
+    }
+
     setUploadError(null);
 
     const reader = new FileReader();
+
     reader.onload = (e) => {
       const dataUrl = e.target?.result as string;
+
       if (!dataUrl) return;
 
+      // Keep SVG as-is
       if (file.type === 'image/svg+xml' || ext === 'svg') {
         setImage(dataUrl);
         return;
       }
 
       const img = new Image();
+
       img.onload = () => {
         const maxWidth = 500;
         const maxHeight = 650;
+
         let width = img.width;
         let height = img.height;
 
@@ -178,24 +258,40 @@ export const LeadersTab: React.FC = () => {
         }
 
         const canvas = document.createElement('canvas');
+
         canvas.width = width;
         canvas.height = height;
+
         const ctx = canvas.getContext('2d');
+
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
-          const format = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
-          const compressedDataUrl = canvas.toDataURL(format, 0.88);
+
+          const format =
+            file.type === 'image/png'
+              ? 'image/png'
+              : 'image/jpeg';
+
+          const compressedDataUrl = canvas.toDataURL(
+            format,
+            0.88
+          );
+
           setImage(compressedDataUrl);
         } else {
           setImage(dataUrl);
         }
       };
+
       img.src = dataUrl;
     };
+
     reader.readAsDataURL(file);
   };
 
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (e.target.files && e.target.files[0]) {
       handleImageFile(e.target.files[0]);
     }
@@ -203,7 +299,9 @@ export const LeadersTab: React.FC = () => {
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+
     setIsDragging(false);
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleImageFile(e.dataTransfer.files[0]);
     }
@@ -218,57 +316,123 @@ export const LeadersTab: React.FC = () => {
     setIsDragging(false);
   };
 
-  const handleSaveSubmit = (e: React.FormEvent) => {
+  const handleSaveSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !role.trim()) return;
+
+    if (!name.trim() || !role.trim()) {
+      return;
+    }
 
     const trimmedImg = image.trim();
-    if (trimmedImg && !isImageFormatValid(trimmedImg)) {
-      setUploadError('Image URL must be in JPEG (.jpg, .jpeg), SVG (.svg), or PNG (.png) format.');
+
+    if (!trimmedImg) {
+      setUploadError('Portrait image is required.');
+      return;
+    }
+
+    if (!isImageFormatValid(trimmedImg)) {
+      setUploadError(
+        'Image must be JPEG (.jpg/.jpeg), SVG (.svg), or PNG (.png).'
+      );
+      return;
+    }
+
+    const token = getAdminToken();
+
+    if (!token) {
+      setUploadError(
+        'Admin authentication expired. Please log in again.'
+      );
       return;
     }
 
     playAccessGranted();
 
-    const leaderObj: Leader = {
-      id: editingLeaderId || `leader-${Date.now()}`,
-      name: name.trim(),
-      role: role.trim().toUpperCase(),
-      category,
-      image: trimmedImg || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800',
-      bio: bio.trim(),
-      github: github.trim() || undefined,
-      linkedin: linkedin.trim() || undefined,
-      email: email.trim() || undefined,
-    };
+    try {
+      const leaderData = {
+        name: name.trim(),
+        role: role.trim().toUpperCase(),
+        category,
+        image: trimmedImg,
+        bio: bio.trim(),
+        github: github.trim() || undefined,
+        linkedin: linkedin.trim() || undefined,
+        email: email.trim() || undefined,
+        contributions: [],
+      };
 
-    if (editingLeaderId) {
-      updateStoredLeader(leaderObj);
-    } else {
-      addStoredLeader(leaderObj);
+      const url = editingLeaderId
+        ? `${API_BASE_URL}/api/admin/team/${editingLeaderId}`
+        : `${API_BASE_URL}/api/admin/team`;
+
+      const method = editingLeaderId ? 'PATCH' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(leaderData),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            `Failed to ${editingLeaderId ? 'update' : 'create'} leader`
+        );
+      }
+
+      await fetchLeaders();
+
+      setIsModalOpen(false);
+
+      setEditingLeaderId(null);
+      setName('');
+      setRole('CORE TECHNICAL LEAD');
+      setCategory('core');
+      setImage('');
+      setBio('');
+      setGithub('');
+      setLinkedin('');
+      setEmail('');
+      setUploadError(null);
+    } catch (error) {
+      console.error('Failed to save leader:', error);
+
+      setUploadError(
+        error instanceof Error
+          ? error.message
+          : 'Failed to save leadership member.'
+      );
     }
-
-    refreshLeaders();
-    setIsModalOpen(false);
   };
 
-  const filteredLeaders = leaders.filter((l) => {
+  const filteredLeaders = leaders.filter((leader) => {
     const q = search.toLowerCase();
-    return l.name.toLowerCase().includes(q) || l.role.toLowerCase().includes(q);
+
+    return (
+      leader.name.toLowerCase().includes(q) ||
+      leader.role.toLowerCase().includes(q)
+    );
   });
 
   return (
     <div className="space-y-5 font-mono">
-      {/* Top Banner Header Card */}
+      {/* Header */}
       <div className="rounded-xl border border-emerald-900/90 bg-[#061109]/90 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-3.5">
           <div className="w-10 h-10 rounded-lg bg-[#041d0e] border border-emerald-500/80 flex items-center justify-center text-emerald-400">
             <Shield className="w-5 h-5" />
           </div>
+
           <div>
             <h2 className="text-base sm:text-lg font-bold text-white tracking-wide">
               LEADERSHIP STRUCTURE ROSTER
             </h2>
+
             <p className="text-xs text-emerald-500/90 font-sans mt-0.5">
               Manage office bearers, mentors, and core committee coordinators.
             </p>
@@ -279,10 +443,9 @@ export const LeadersTab: React.FC = () => {
           <button
             onClick={handleResetDefaults}
             className="px-3.5 py-1.5 rounded-lg border border-emerald-800 bg-[#07190d] hover:bg-emerald-950 text-emerald-300 hover:text-white text-xs flex items-center gap-1.5 transition-all cursor-pointer font-sans"
-            title="Reset Roster"
           >
             <RotateCcw className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Reset Roster</span>
+            <span>Refresh Roster</span>
           </button>
 
           <button
@@ -295,9 +458,10 @@ export const LeadersTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Search */}
       <div className="relative">
         <Search className="w-4 h-4 text-emerald-500 absolute left-3 top-1/2 -translate-y-1/2" />
+
         <input
           type="text"
           value={search}
@@ -307,7 +471,7 @@ export const LeadersTab: React.FC = () => {
         />
       </div>
 
-      {/* Leadership Cards Grid */}
+      {/* Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredLeaders.map((leader) => (
           <div
@@ -351,7 +515,9 @@ export const LeadersTab: React.FC = () => {
               </button>
 
               <button
-                onClick={() => handleDelete(leader.id, leader.name)}
+                onClick={() =>
+                  handleDelete(leader.id, leader.name)
+                }
                 className="px-3 py-1 rounded bg-rose-950/30 hover:bg-rose-900/40 border border-rose-900/60 text-rose-400 hover:text-rose-200 text-xs flex items-center gap-1 transition-all cursor-pointer font-sans"
               >
                 <Trash2 className="w-3 h-3 text-rose-400" />
@@ -362,15 +528,21 @@ export const LeadersTab: React.FC = () => {
         ))}
       </div>
 
-      {/* Add / Edit Leader Modal with Portrait Image Upload */}
+      {/* Add/Edit Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="w-full max-w-lg bg-[#061209] border border-emerald-500 rounded-2xl p-6 shadow-2xl font-mono max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-emerald-900 pb-3">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <Shield className="w-4 h-4 text-emerald-400" />
-                <span>{editingLeaderId ? 'EDIT LEADER PROFILE' : 'ADD NEW LEADER'}</span>
+
+                <span>
+                  {editingLeaderId
+                    ? 'EDIT LEADER PROFILE'
+                    : 'ADD NEW LEADER'}
+                </span>
               </h3>
+
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="text-emerald-600 hover:text-white cursor-pointer"
@@ -379,9 +551,16 @@ export const LeadersTab: React.FC = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSaveSubmit} className="py-4 space-y-3.5 text-xs">
+            <form
+              onSubmit={handleSaveSubmit}
+              className="py-4 space-y-3.5 text-xs"
+            >
+              {/* Name */}
               <div>
-                <label className="text-emerald-400 block mb-1">Full Name *</label>
+                <label className="text-emerald-400 block mb-1">
+                  Full Name *
+                </label>
+
                 <input
                   type="text"
                   required
@@ -392,8 +571,12 @@ export const LeadersTab: React.FC = () => {
                 />
               </div>
 
+              {/* Role */}
               <div>
-                <label className="text-emerald-400 block mb-1">Role / Designation *</label>
+                <label className="text-emerald-400 block mb-1">
+                  Role / Designation *
+                </label>
+
                 <input
                   type="text"
                   required
@@ -404,19 +587,46 @@ export const LeadersTab: React.FC = () => {
                 />
               </div>
 
-              {/* Portrait Image Upload Component */}
+              {/* Category */}
+              <div>
+                <label className="text-emerald-400 block mb-1">
+                  Leadership Category
+                </label>
+
+                <select
+                  value={category}
+                  onChange={(e) =>
+                    setCategory(
+                      e.target.value as
+                        | 'executive'
+                        | 'faculty'
+                        | 'core'
+                    )
+                  }
+                  className="w-full px-3 py-2 rounded bg-black border border-emerald-900 focus:border-emerald-400 text-white"
+                >
+                  <option value="executive">Executive</option>
+                  <option value="faculty">Faculty</option>
+                  <option value="core">Core</option>
+                </select>
+              </div>
+
+              {/* Image */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-emerald-400 font-bold flex items-center gap-1.5">
                     <Camera className="w-3.5 h-3.5 text-emerald-400" />
                     <span>Portrait Image Upload *</span>
                   </label>
+
                   <button
                     type="button"
                     onClick={() => setShowUrlInput(!showUrlInput)}
                     className="text-[10px] text-emerald-500 hover:text-emerald-300 underline font-sans cursor-pointer"
                   >
-                    {showUrlInput ? 'Hide URL input' : 'Or paste image URL'}
+                    {showUrlInput
+                      ? 'Hide URL input'
+                      : 'Or paste image URL'}
                   </button>
                 </div>
 
@@ -451,6 +661,7 @@ export const LeadersTab: React.FC = () => {
                         <ImageIcon className="w-6 h-6" />
                       </div>
                     )}
+
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[9px] text-white transition-opacity font-sans">
                       Change
                     </div>
@@ -461,21 +672,25 @@ export const LeadersTab: React.FC = () => {
                       <Upload className="w-3.5 h-3.5 text-emerald-400" />
                       <span>Click to upload or drag &amp; drop</span>
                     </div>
+
                     <p className="text-[11px] text-emerald-600 font-sans mt-0.5">
-                      Supported formats: <strong className="text-emerald-400">JPEG</strong>, <strong className="text-emerald-400">SVG</strong>, <strong className="text-emerald-400">PNG</strong>
+                      Supported formats:{' '}
+                      <strong className="text-emerald-400">
+                        JPEG
+                      </strong>
+                      ,{' '}
+                      <strong className="text-emerald-400">
+                        SVG
+                      </strong>
+                      ,{' '}
+                      <strong className="text-emerald-400">
+                        PNG
+                      </strong>
                     </p>
+
                     <div className="flex items-center gap-1.5 mt-1.5">
                       <span className="px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-800 text-[10px] text-emerald-400 font-sans">
                         Browse Computer
-                      </span>
-                      <span className="px-1.5 py-0.2 rounded bg-black/60 border border-emerald-900/60 text-[9px] text-emerald-500 font-mono">
-                        .JPEG
-                      </span>
-                      <span className="px-1.5 py-0.2 rounded bg-black/60 border border-emerald-900/60 text-[9px] text-emerald-500 font-mono">
-                        .SVG
-                      </span>
-                      <span className="px-1.5 py-0.2 rounded bg-black/60 border border-emerald-900/60 text-[9px] text-emerald-500 font-mono">
-                        .PNG
                       </span>
                     </div>
                   </div>
@@ -490,7 +705,10 @@ export const LeadersTab: React.FC = () => {
                 {showUrlInput && (
                   <div className="mt-2.5 p-2.5 rounded-lg bg-black/80 border border-emerald-900/80 space-y-1.5">
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="text-emerald-400 font-bold font-mono">Image URL (JPEG, SVG, PNG)</span>
+                      <span className="text-emerald-400 font-bold font-mono">
+                        Image URL (JPEG, SVG, PNG)
+                      </span>
+
                       {image && (
                         isImageFormatValid(image) ? (
                           <span className="text-[10px] text-emerald-400 flex items-center gap-1 font-mono">
@@ -499,44 +717,56 @@ export const LeadersTab: React.FC = () => {
                           </span>
                         ) : (
                           <span className="text-[10px] text-amber-400 font-mono">
-                            Must be .jpeg, .svg, or .png
+                            Invalid format
                           </span>
                         )
                       )}
                     </div>
+
                     <input
                       type="url"
                       value={image}
                       onChange={(e) => {
                         setImage(e.target.value);
-                        if (uploadError) setUploadError(null);
+
+                        if (uploadError) {
+                          setUploadError(null);
+                        }
                       }}
-                      placeholder="https://.../photo.jpeg, photo.svg, photo.png"
+                      placeholder="https://.../photo.jpeg"
                       className="w-full px-3 py-1.5 rounded bg-black border border-emerald-900 focus:border-emerald-400 text-white font-mono text-[11px]"
                     />
+
                     <p className="text-[10px] text-emerald-600 font-sans">
-                      Enter direct URL ending in .jpeg, .jpg, .svg, or .png (or data:image/jpeg, data:image/png, data:image/svg+xml)
+                      Enter a direct image URL ending in .jpeg, .jpg,
+                      .svg, or .png.
                     </p>
                   </div>
                 )}
               </div>
 
+              {/* Bio */}
               <div>
                 <label className="text-emerald-400 block mb-1">
                   Biography / Profile Note (Optional)
                 </label>
+
                 <textarea
                   rows={2}
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  placeholder="Enter optional bio or student background (leave blank if not needed)..."
+                  placeholder="Enter optional bio or student background..."
                   className="w-full px-3 py-2 rounded bg-black border border-emerald-900 focus:border-emerald-400 text-white font-sans text-xs resize-none placeholder-emerald-800"
                 />
               </div>
 
+              {/* Social */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-emerald-400 block mb-1">LinkedIn URL</label>
+                  <label className="text-emerald-400 block mb-1">
+                    LinkedIn URL
+                  </label>
+
                   <input
                     type="url"
                     value={linkedin}
@@ -545,8 +775,12 @@ export const LeadersTab: React.FC = () => {
                     className="w-full px-3 py-2 rounded bg-black border border-emerald-900 focus:border-emerald-400 text-white font-mono text-[11px]"
                   />
                 </div>
+
                 <div>
-                  <label className="text-emerald-400 block mb-1">GitHub URL</label>
+                  <label className="text-emerald-400 block mb-1">
+                    GitHub URL
+                  </label>
+
                   <input
                     type="url"
                     value={github}
@@ -557,6 +791,22 @@ export const LeadersTab: React.FC = () => {
                 </div>
               </div>
 
+              {/* Email */}
+              <div>
+                <label className="text-emerald-400 block mb-1">
+                  Email
+                </label>
+
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="leader@sjec.ac.in"
+                  className="w-full px-3 py-2 rounded bg-black border border-emerald-900 focus:border-emerald-400 text-white font-mono text-[11px]"
+                />
+              </div>
+
+              {/* Buttons */}
               <div className="flex justify-end gap-2 pt-3 border-t border-emerald-900/60">
                 <button
                   type="button"
@@ -565,11 +815,14 @@ export const LeadersTab: React.FC = () => {
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
                   className="px-4 py-1.5 rounded bg-emerald-500 hover:bg-emerald-400 text-black font-bold cursor-pointer font-sans"
                 >
-                  {editingLeaderId ? 'Update Leader' : 'Save Leader'}
+                  {editingLeaderId
+                    ? 'Update Leader'
+                    : 'Save Leader'}
                 </button>
               </div>
             </form>
