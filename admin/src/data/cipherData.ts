@@ -1,4 +1,5 @@
 import type { Leader, DomainItem, EventItem, ArchiveItem } from '../types';
+
 export const CIPHER_META = {
   name: 'CIPHER',
   fullName: 'Student Association of Computer Science & Engineering',
