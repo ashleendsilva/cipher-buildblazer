@@ -1,54 +1,55 @@
-# CIPHER — Student Association of CSE
-> **St Joseph Engineering College (SJEC)**  
-> *Official platform for the Student Association of the Department of Computer Science & Engineering.*
+# Cipher Build Blazer 
 
----
+Live build phase for **Cipher (CSE Association)'s** track of the Build Blazer event at SJEC.
 
-## ⚡ Overview
+This repo is the starting point for Phase 2, where third-year teams fork it and build the winning design into a live, deployed website.
 
-**CIPHER** is an interactive web platform for the CSE Student Association at SJEC. It highlights departmental leadership, technical workshops, flagship hackathons, and student initiatives with an interactive cyberpunk interface.
+## How this works
 
----
+The CIPHER portal is a cyberpunk-themed association website featuring two core experiences:
 
-## 🛠️ Tech Stack
+1. **Public Website**:
+   - **Bootloader & Interactive Canvas**: Simulated BIOS boot sequence, synthesized Web Audio effects, and dynamic mouse-reactive grid and topographic contour visuals.
+   - **Community & Events**: Live announcement broadcasts, department showcase, leadership directory, and hackathon timeline with event registration.
+   - **Recruitment**: Student membership application modal, matrix visualizers, and secret terminal access (`Ctrl+Shift+A`).
 
-- **Frontend**: React 19, TypeScript, Vite
-- **Styling**: Tailwind CSS v4
-- **Animation & Icons**: Motion, Lucide React
-- **Graphics & Audio**: HTML5 Canvas, Web Audio API
+2. **Admin Panel:**
+   - Secure admin dashboard for managing the website content.
+   - Admins can manage announcements, events, registrations, memberships, and team information.
+   - Dashboard provides an overview of important platform statistics.
 
----
+## Getting started
 
-## 🚀 Getting Started
-
-### 1. Installation
 ```bash
+git clone https://github.com/ashleendsilva/cipher-buildblazer.git
+cd cipher-buildblazer
 npm install
-```
-
-### 2. Run Development Server
-```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### 3. Build for Production
-```bash
-npm run build
-```
+## Team
 
+| Role | Name |
+|------|------|
+| Team Lead | Ashleen Dsilva |
+| Team member 1 | Ceana Venisia Dsouza |
+|  Team member 2| Blenisha Cutinha |
+           
+## Design Reference
+
+The website design was created based on the CIPHER Figma design provided for the Build Blazer project.
+
+## Tech stack
+
+- **Framework & Runtime**: React 19, TypeScript, Vite
+- **Styling**: Tailwind CSS v4
+- **Animation & Icons**: Motion (`motion`), Lucide Icons (`lucide-react`), Canvas Confetti (`canvas-confetti`)
+- **Backend / Dev Server**: Express (`express`), TSX (`tsx`)
+
+## Deployment
+
+Live links:
+- Public Website: https://cipherbuildblazer.netlify.app/
+- Admin Panel: https://cipheradminpanel.netlify.app/
 ---
-
-## 📜 Available Scripts
-
-- `npm run dev` — Run development server on port 3000
-- `npm run build` — Build production bundle to `dist/`
-- `npm run preview` — Locally preview the production build
-- `npm run lint` — Type-check codebase with `tsc --noEmit`
-
----
-
-## 📄 License
-
-MIT © CIPHER, Department of Computer Science & Engineering, SJEC.
-
+Organized by **Cipher (CSE Association)**, SJEC, in collaboration with **AgentBlazer Club**.
