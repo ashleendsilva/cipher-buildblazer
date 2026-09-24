@@ -15,6 +15,9 @@ import { MatrixRainCanvas } from './MatrixRainCanvas';
 import { useScrambleText } from '../utils/scrambleText';
 import { playCyberClick } from '../utils/audio';
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 export const LeadershipSection: React.FC = () => {
   const headingText = useScrambleText('Leadership Structure', true, 750, 14);
   const [selectedLeader, setSelectedLeader] = useState<Leader | null>(null);
@@ -33,7 +36,7 @@ export const LeadershipSection: React.FC = () => {
   useEffect(() => {
     const fetchLeaders = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/team');
+        const response = await fetch(`${API_BASE_URL}/api/team`);
 
         if (!response.ok) {
           throw new Error('Failed to fetch team');
