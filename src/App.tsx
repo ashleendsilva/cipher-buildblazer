@@ -11,8 +11,6 @@ import { TopographicMeshCanvas } from './components/TopographicMeshCanvas';
 import { IntroBootloader } from './components/IntroBootloader';
 import { JoinModal } from './components/JoinModal';
 import { RootAccessModal } from './components/RootAccessModal';
-import { AdminPanel } from './components/AdminPanel/AdminPanel';
-import { AdminAuthModal } from './components/AdminPanel/AdminAuthModal';
 import { playAccessGranted, playCyberBeep, playCyberClick } from './utils/audio';
 
 // Helper to determine if the current URL points to the private Admin console
@@ -86,63 +84,7 @@ export default function App() {
   const [booted, setBooted] = useState(false);
   const [isJoinOpen, setIsJoinOpen] = useState(false);
   const [isRootOpen, setIsRootOpen] = useState(false);
-  const [isAdminAuthOpen, setIsAdminAuthOpen] = useState(false);
-  const [isAdminRoute, setIsAdminRoute] = useState<boolean>(() => checkIsAdminRoute());
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() =>
-    checkIsAdminAuthenticated()
-  );
-
-  // Listen to URL changes (when user types or updates /admin or #admin in address bar)
-  useEffect(() => {
-    const handleUrlChange = () => {
-      const isAdmin = checkIsAdminRoute();
-      setIsAdminRoute(isAdmin);
-      const isAuth = checkIsAdminAuthenticated();
-      setIsAdminAuthenticated(isAuth);
-    };
-
-    window.addEventListener('popstate', handleUrlChange);
-    window.addEventListener('hashchange', handleUrlChange);
-
-    // Periodic check to capture direct browser address bar inputs in preview environments
-    const interval = setInterval(handleUrlChange, 350);
-
-    // Check immediately on mount
-    handleUrlChange();
-
-    return () => {
-      window.removeEventListener('popstate', handleUrlChange);
-      window.removeEventListener('hashchange', handleUrlChange);
-      clearInterval(interval);
-    };
-  }, []);
-
-  const navigateToAdmin = useCallback(() => {
-    playCyberClick();
-    if (window.history?.pushState) {
-      window.history.pushState({}, '', '/admin');
-    }
-    window.location.hash = 'admin';
-    setIsAdminRoute(true);
-  }, []);
-
-  const navigateToPublic = useCallback(() => {
-    playCyberClick();
-    if (window.history?.pushState) {
-      window.history.pushState({}, '', '/');
-    }
-    window.location.hash = '';
-    setIsAdminRoute(false);
-
-    try {
-      sessionStorage.removeItem('cipher_admin_session');
-    } catch {
-      // ignore storage errors
-    }
-    setIsAdminAuthenticated(checkIsAdminAuthenticated());
-  }, []);
-
-  // Keyboard shortcut listener (Ctrl+Shift+A for admin toggle, Konami code for easter egg)
+  // Keyboard shortcut listener (Konami code for easter egg)
   useEffect(() => {
     const konamiSequence = [
       'arrowup',
@@ -159,36 +101,9 @@ export default function App() {
     let currentIndex = 0;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      const isAKey = e.key === 'A' || e.key === 'a' || e.code === 'KeyA';
-      // Secret admin shortcut: Ctrl + Shift + A, Cmd + Shift + A, Alt + A, or Ctrl + Alt + A
-      const isAdmKey =
-        ((e.ctrlKey || e.metaKey) && e.shiftKey && isAKey) ||
-        (e.altKey && isAKey) ||
-        ((e.ctrlKey || e.metaKey) && e.altKey && isAKey);
-
-      if (isAdmKey) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (isAdminRoute && isAdminAuthenticated) {
-          navigateToPublic();
-        } else if (isAdminRoute && !isAdminAuthenticated) {
-          // Already on admin gate
-        } else {
-          setIsAdminAuthOpen(true);
-        }
-        return;
-      }
-
-      // Close modals on Escape
       if (e.key === 'Escape') {
         setIsJoinOpen(false);
         setIsRootOpen(false);
-        if (isAdminAuthOpen) {
-          setIsAdminAuthOpen(false);
-        }
-        if (isAdminRoute && !checkIsAdminAuthenticated()) {
-          navigateToPublic();
-        }
         return;
       }
 
@@ -222,33 +137,6 @@ export default function App() {
     playCyberBeep(440, 'sine', 0.08, 0.05);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
-  // Dedicated Admin Route View:
-  // If authenticated: render the full Root Command Console AdminPanel.
-  // If not authenticated: render the secure Admin Clearance Gate with AdminAuthModal.
-  if (isAdminRoute) {
-    if (isAdminAuthenticated) {
-      return (
-        <AdminPanel
-          onExit={navigateToPublic}
-          onLogout={() => setIsAdminAuthenticated(false)}
-        />
-      );
-    }
-
-    return (
-      <div className="relative min-h-screen bg-[#050806] cyber-grid text-emerald-100 font-mono flex items-center justify-center p-4">
-        <InteractiveMouseGrid fullPage={true} />
-        <AdminAuthModal
-          onSuccess={() => {
-            setIsAdminAuthOpen(false);
-            setIsAdminAuthenticated(true);
-          }}
-          onCancel={navigateToPublic}
-        />
-      </div>
-    );
-  }
 
   // Otherwise, render the public-facing CIPHER web application (clean, no admin links)
   return (
