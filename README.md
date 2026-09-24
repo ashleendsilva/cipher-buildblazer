@@ -68,6 +68,7 @@ npm run dev
 Live links:
 - Public Website: https://cipherbuildblazer.netlify.app/
 - Admin Panel: https://cipheradminpanel.netlify.app/
+- Backend: https://cipher-buildblazer-khoj.onrender.com
 
 ---
 Organized by **Cipher (CSE Association)**, SJEC, in collaboration with **AgentBlazer Club**.
