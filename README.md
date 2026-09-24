@@ -35,10 +35,6 @@ npm run dev
 | Team member 1 | Ceana Venisia Dsouza |
 |  Team member 2| Blenisha Cutinha |
            
-## Design Reference
-
-The website design was created based on the CIPHER Figma design provided for the Build Blazer project.
-
 ## Tech stack
 
 - **Framework & Runtime**: React 19, TypeScript, Vite
