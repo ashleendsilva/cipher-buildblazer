@@ -126,7 +126,7 @@ export default function App() {
       window.removeEventListener('keydown', handleKeyDown, { capture: true });
       document.removeEventListener('keydown', handleKeyDown, { capture: true });
     };
-  }, [isAdminRoute, isAdminAuthenticated, navigateToAdmin, navigateToPublic, isAdminAuthOpen]);
+  }, []);
 
   const handleBootComplete = () => {
     setBooted(true);
@@ -183,19 +183,6 @@ export default function App() {
       </div>
 
       {/* Modals & Cyber Drawers for Public Website */}
-      {isAdminAuthOpen && (
-        <AdminAuthModal
-          onSuccess={() => {
-            setIsAdminAuthOpen(false);
-            setIsAdminAuthenticated(true);
-            navigateToAdmin();
-          }}
-          onCancel={() => {
-            setIsAdminAuthOpen(false);
-          }}
-        />
-      )}
-
       <JoinModal
         isOpen={isJoinOpen}
         onClose={() => setIsJoinOpen(false)}

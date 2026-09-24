@@ -266,10 +266,10 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Applied Machine Learning',
     category: 'AI & ML',
     year: '2025',
-    url: 'https://scikit-learn.org/stable/',
-    description: 'Comprehensive walkthrough of feature engineering, scikit-learn pipelines, model hyperparameter tuning, and real-world inference deployments.',
-    tags: ['Scikit-Learn', 'Feature Store', 'Classification', 'Inference'],
-    leadSpeaker: 'AI Research Lab & Cipher Leads'
+    url: 'https://sjec.ac.in/cipher/activity/applied-machine-learning',
+    description: '',
+    tags: [],
+    leadSpeaker: ''
   },
   {
     num: '02',
@@ -277,10 +277,10 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Industrial Visit',
     category: 'Industry & Career',
     year: '2025',
-    url: 'https://sjec.ac.in/department-computer-science.php',
-    description: 'Excursion to premier enterprise IT parks, touring production tier-3 data centers, CI/CD operations, and cloud infrastructure control centers.',
-    tags: ['Cloud Infrastructure', 'Enterprise DevOps', 'Data Centers'],
-    leadSpeaker: 'Industry Relations Cell'
+    url: 'https://sjec.ac.in/cipher/activity/industrial-visit-1',
+    description: '',
+    tags: [],
+    leadSpeaker: ''
   },
   {
     num: '03',
@@ -288,10 +288,10 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'LaTeX Tool',
     category: 'Tools & Systems',
     year: '2025',
-    url: 'https://www.overleaf.com/learn',
-    description: 'Masterclass on professional research paper typesetting, mathematical equation styling, IEEE formatting, and automated bibliography management with BibTeX.',
-    tags: ['IEEE Standard', 'BibTeX', 'Research Publishing', 'Typography'],
-    leadSpeaker: 'Dept Research Committee'
+    url: 'https://sjec.ac.in/cipher/activity/latex-tool',
+    description: '',
+    tags: [''],
+    leadSpeaker: ''
   },
   {
     num: '04',
@@ -299,10 +299,10 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     title: 'Robotic Process Automation using UiPath',
     category: 'Development',
     year: '2025',
-    url: 'https://academy.uipath.com/',
-    description: 'Hands-on laboratory introducing software bots, workflow orchestrator nodes, document understanding OCR engines, and automated business processes.',
-    tags: ['UiPath', 'Bot Workflows', 'Enterprise RPA', 'OCR'],
-    leadSpeaker: 'UiPath Academic Alliance'
+    url: 'https://sjec.ac.in/cipher/activity/robotic-process-automation-design-and-development-using-uipath',
+    description: '',
+    tags: [''],
+    leadSpeaker: ''
   },
   {
     num: '05',
@@ -311,9 +311,9 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     category: 'Development',
     year: '2025',
     url: 'https://hacktofuture.sjec.ac.in/',
-    description: 'Flagship 24-hour hackathon bringing together multidisciplinary engineering squads to formulate, prototype, and pitch civic & AI software solutions.',
-    tags: ['24h Hackathon', 'Rapid Prototyping', 'Product Pitch', 'Cash Prizes'],
-    leadSpeaker: 'CIPHER Tech Council'
+    description: '',
+    tags: [''],
+    leadSpeaker: ''
   },
   {
     num: '06',
@@ -322,9 +322,9 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     category: 'Development',
     year: '2025',
     url: 'https://codeforces.com/edu/courses',
-    description: 'Competitive programming masterclass dissecting time complexities, dynamic programming recurrence relations, graph traversals, and ICPC strategies.',
-    tags: ['Competitive Coding', 'DP', 'Graph Theory', 'ICPC Prep'],
-    leadSpeaker: 'CodeChef & LeetCode Alumni'
+     description: '',
+    tags: [''],
+    leadSpeaker: ''
   },
   {
     num: '07',
@@ -333,9 +333,9 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     category: 'Tools & Systems',
     year: '2024',
     url: 'https://crowdsource.google.com/',
-    description: 'Interactive session exploring data quality in machine learning models, diverse dataset validation, language translation benchmarks, and open community science.',
-    tags: ['Google AI', 'Dataset Diversity', 'Crowdsource Community'],
-    leadSpeaker: 'Google Crowdsource Influencers'
+    description: '',
+    tags: [''],
+    leadSpeaker: ''
   },
   {
     num: '08',
@@ -344,9 +344,9 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     category: 'Tools & Systems',
     year: '2024',
     url: 'https://github.com/skills',
-    description: 'From git init to collaborative upstream PRs: interactive workshop covering branch protection, merge conflict resolution, GitHub Actions CI, and markdown READMEs.',
-    tags: ['Git CLI', 'Actions CI/CD', 'Open Source PRs', 'Collaboration'],
-    leadSpeaker: 'GitHub Campus Experts'
+    description: '',
+    tags: [''],
+    leadSpeaker: ''
   },
   {
     num: '09',
@@ -355,9 +355,9 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     category: 'Industry & Career',
     year: '2024',
     url: 'https://sjec.ac.in/department-computer-science.php',
-    description: 'On-site technical exposure visit to leading software engineering campuses and automotive embedded systems testing facilities.',
-    tags: ['Software Engineering', 'Automotive Embedded', 'QA Pipelines'],
-    leadSpeaker: 'Faculty Outreach Lead'
+     description: '',
+    tags: [''],
+    leadSpeaker: ''
   },
   {
     num: '10',
@@ -366,9 +366,9 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     category: 'Industry & Career',
     year: '2024',
     url: 'https://sjec.ac.in/training-and-placements.php',
-    description: 'Rigorous campus interview simulation with senior alumni and HR specialists, featuring DSA technical screenings, system design rounds, and HR behavioral appraisals.',
-    tags: ['Mock Technical Rounds', 'System Design', 'Behavioral HR', 'Resume Audit'],
-    leadSpeaker: 'SJEC Placement Cell & Alumni Panel'
+    description: '',
+    tags: [''],
+    leadSpeaker: ''
   },
   {
     num: '11',
@@ -377,9 +377,9 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     category: 'Academic & Grants',
     year: '2024',
     url: 'https://sjec.ac.in/',
-    description: 'Departmental orientation introducing curriculum roadmaps, computing club domains, laboratory ethics, open-source communities, and senior mentorship pairings.',
-    tags: ['Branch Induction', 'Mentorship', 'Curriculum Guide'],
-    leadSpeaker: 'CIPHER Office Bearers'
+    description: '',
+    tags: [''],
+    leadSpeaker: ''
   },
   {
     num: '12',
@@ -388,9 +388,9 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     category: 'Academic & Grants',
     year: '2024',
     url: 'https://www.kscst.iisc.ernet.in/spp.html',
-    description: 'Showcase and grant writing incubator guiding students in submitting high-impact engineering projects to the Karnataka State Council for Science and Technology.',
-    tags: ['Research Grants', 'KSCST Funding', 'Patent Filing', 'State Innovation'],
-    leadSpeaker: 'Research Advisory Board'
+    description: '',
+    tags: [''],
+    leadSpeaker: ''
   },
   {
     num: '13',
@@ -399,9 +399,9 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     category: 'AI & ML',
     year: '2024',
     url: 'https://arxiv.org/',
-    description: 'Empowering student scholars with ethical LLM literature review tools, semantic search engines, citation cross-examiners, and synthetic data validation frameworks.',
-    tags: ['Literature Synthesis', 'Semantic Search', 'Ethical AI', 'Paper Review'],
-    leadSpeaker: 'AI Faculty & Research Scholars'
+    description: '',
+    tags: [''],
+    leadSpeaker: ''
   },
   {
     num: '14',
@@ -410,9 +410,9 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     category: 'Development',
     year: '2024',
     url: 'https://soliditylang.org/',
-    description: 'Building decentralized applications on Ethereum: smart contract syntax, ERC-20 tokenomics, Hardhat testing environments, and gas optimization techniques.',
-    tags: ['Solidity', 'Ethereum EVM', 'Hardhat', 'Smart Contracts'],
-    leadSpeaker: 'Web3 Developer Collective'
+     description: '',
+    tags: [''],
+    leadSpeaker: ''
   },
   {
     num: '15',
@@ -421,9 +421,9 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     category: 'Tools & Systems',
     year: '2024',
     url: 'https://staruml.io/',
-    description: 'Practical architectural blueprinting using Star UML: class diagrams, sequence flows, use-case modeling, state machine diagrams, and enterprise software documentation.',
-    tags: ['UML Modeling', 'Software Architecture', 'Sequence Flows', 'OOAD'],
-    leadSpeaker: 'Software Engineering Faculty'
+    description: '',
+    tags: [''],
+    leadSpeaker: ''
   },
   {
     num: '16',
@@ -432,9 +432,9 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     category: 'AI & ML',
     year: '2024',
     url: 'https://platform.openai.com/docs/',
-    description: 'End-to-end tutorial on crafting context-aware enterprise copilots, utilizing function calling, streaming APIs, embedding vector databases, and Retrieval-Augmented Generation (RAG).',
-    tags: ['OpenAI APIs', 'Vector Embeddings', 'RAG Architecture', 'Function Calling'],
-    leadSpeaker: 'CIPHER AI Lead'
+    description: '',
+    tags: [''],
+    leadSpeaker: ''
   },
   {
     num: '17',
@@ -443,9 +443,9 @@ export const ARCHIVE_ITEMS: ArchiveItem[] = [
     category: 'Development',
     year: '2024',
     url: 'https://react.dev/',
-    description: 'Hands-on full-stack bootcamp building a live real-time task manager: React state and hooks, Tailwind styling, Express REST endpoints, JWT auth, and MongoDB models.',
-    tags: ['React 18', 'Node.js', 'Express', 'JWT Authentication', 'REST APIs'],
-    leadSpeaker: 'Full-Stack Student Mentors'
+     description: '',
+    tags: [''],
+    leadSpeaker: ''
   }
 ];
 
