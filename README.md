@@ -46,6 +46,7 @@ cd admin
 npm install
 npm run dev
 ```
+(Admin Password : CIPHER2026)
 ## Team
 
 | Role | Name |
