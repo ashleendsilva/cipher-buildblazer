@@ -73,7 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenJoin, onReplayIntro }) => 
       }`}
     >
       {/* Real-time Campus Broadcast Notification Banner */}
-      <AnnouncementBanner onOpenJoin={onOpenJoin} />
+      <AnnouncementBanner />
 
       <div
         className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-all duration-300 ${

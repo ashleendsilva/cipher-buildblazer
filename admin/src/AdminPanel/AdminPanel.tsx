@@ -31,8 +31,7 @@ type TabType =
   | 'leaders'
   | 'announcements';
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = 'https://cipher-buildblazer-khoj.onrender.com';
 
 const getAdminToken = (): string | null => {
   if (typeof window === 'undefined') return null;

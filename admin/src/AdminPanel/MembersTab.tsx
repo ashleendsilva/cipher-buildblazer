@@ -9,132 +9,227 @@ import {
   X,
   Mail,
   Phone,
+  Github,
+  Linkedin,
   ChevronRight,
   Trash2,
 } from 'lucide-react';
-
-import type { MemberSubmission } from '../types';
-
-import {
-  getStoredMembers,
-  updateMemberStatus,
-  deleteStoredMember,
-  clearAllStoredMembers,
-} from '../utils/storage';
-
+import type { MemberSubmission } from '../../../src/types';
 import { playCyberClick } from '../utils/audio';
 
-const GithubLogo: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    className={className}
-    aria-hidden="true"
-  >
-    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.725-4.042-1.61-4.042-1.61-.546-1.385-1.333-1.754-1.333-1.754-1.089-.745.083-.73.083-.73 1.205.085 1.84 1.237 1.84 1.237 1.07 1.835 2.807 1.305 3.492.998.108-.776.418-1.305.762-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.3 1.23A11.5 11.5 0 0 1 12 5.803c1.02.005 2.045.138 3.003.404 2.29-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.873.118 3.176.77.84 1.233 1.91 1.233 3.22 0 4.61-2.805 5.625-5.475 5.92.43.372.823 1.102.823 2.222 0 1.606-.015 2.898-.015 3.293 0 .322.216.696.825.576C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z" />
-  </svg>
-);
+const API_BASE_URL = 'https://cipher-buildblazer-khoj.onrender.com';
 
-const LinkedinLogo: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="currentColor"
-    className={className}
-    aria-hidden="true"
-  >
-    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V8.999h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.604 0 4.267 2.37 4.267 5.455v6.287zM5.337 7.433a2.062 2.062 0 1 1 0-4.123 2.062 2.062 0 0 1 0 4.123zM7.119 20.452H3.554V8.999h3.565v11.453zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 23.227 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-  </svg>
-);
+const getAdminToken = () =>
+  sessionStorage.getItem('cipher_admin_token') ||
+  localStorage.getItem('cipher_admin_token');
 
 export const MembersTab: React.FC = () => {
-  const [members, setMembers] = useState<MemberSubmission[]>(() =>
-    getStoredMembers()
-  );
-
+  const [members, setMembers] = useState<MemberSubmission[]>([]);
   const [search, setSearch] = useState('');
   const [yearFilter, setYearFilter] = useState<string>('all');
-
-  const [statusFilter, setStatusFilter] = useState<
-    'all' | 'pending' | 'approved' | 'contacted' | 'rejected'
-  >('all');
-
+  const [statusFilter, setStatusFilter] =
+    useState<'all' | 'pending' | 'approved' | 'contacted' | 'rejected'>(
+      'all'
+    );
   const [selectedMember, setSelectedMember] =
     useState<MemberSubmission | null>(null);
 
-  useEffect(() => {
-    const handleSync = (e: Event) => {
-      const customEvent = e as CustomEvent<{ type?: string }>;
+  const fetchMembers = async () => {
+    try {
+      const token = getAdminToken();
 
-      if (
-        !customEvent.detail ||
-        customEvent.detail.type === 'members'
-      ) {
-        setMembers(getStoredMembers());
+      if (!token) {
+        console.error('Admin authentication token not found');
+        return;
       }
-    };
 
-    window.addEventListener('cipher_data_updated', handleSync);
+      const response = await fetch(
+        `${API_BASE_URL}/api/applications`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    return () => {
-      window.removeEventListener('cipher_data_updated', handleSync);
-    };
+      if (!response.ok) {
+        throw new Error('Failed to fetch applications');
+      }
+
+      const data = await response.json();
+
+      const mappedMembers: MemberSubmission[] = data.map(
+        (application: any) => ({
+          id: application.id,
+          applicantId:
+            application.applicantId || application.id,
+          name: application.name,
+          email: application.email,
+          phone: application.phone || '',
+          usn: application.usn || '',
+          year: application.year,
+          domain: application.domain,
+          status: application.status || 'pending',
+          submittedAt: application.createdAt,
+          message: application.message || '',
+          github: application.github || '',
+          linkedin: application.linkedin || '',
+        })
+      );
+
+      setMembers(mappedMembers);
+    } catch (error) {
+      console.error('Failed to load members:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchMembers();
   }, []);
 
   const refreshMembers = () => {
     playCyberClick();
-    setMembers(getStoredMembers());
+    fetchMembers();
   };
 
-  const handleStatusChange = (
+  const handleStatusChange = async (
     id: string,
     newStatus: MemberSubmission['status']
   ) => {
     playCyberClick();
 
-    const updated = updateMemberStatus(id, newStatus);
+    try {
+      const token = getAdminToken();
 
-    setMembers(updated);
+      if (!token) {
+        throw new Error('Admin authentication token not found');
+      }
 
-    if (selectedMember && selectedMember.id === id) {
-      setSelectedMember({
-        ...selectedMember,
-        status: newStatus,
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/applications/${id}/status`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            status: newStatus,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to update application status');
+      }
+
+      await fetchMembers();
+
+      if (selectedMember?.id === id) {
+        setSelectedMember({
+          ...selectedMember,
+          status: newStatus,
+        });
+      }
+    } catch (error) {
+      console.error(
+        'Failed to update member status:',
+        error
+      );
     }
   };
 
-  const handleDelete = (id: string, name: string) => {
+  const handleDelete = async (
+    id: string,
+    name: string
+  ) => {
     if (
-      window.confirm(
+      !window.confirm(
         `Are you sure you want to remove ${name}'s registration record?`
       )
     ) {
-      playCyberClick();
+      return;
+    }
 
-      const updated = deleteStoredMember(id);
+    playCyberClick();
 
-      setMembers(updated);
+    try {
+      const token = getAdminToken();
+
+      if (!token) {
+        throw new Error('Admin authentication token not found');
+      }
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/applications/${id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to delete application');
+      }
+
+      setMembers((current) =>
+        current.filter((member) => member.id !== id)
+      );
 
       if (selectedMember?.id === id) {
         setSelectedMember(null);
       }
+    } catch (error) {
+      console.error(
+        'Failed to delete member:',
+        error
+      );
     }
   };
 
-  const handleClearAll = () => {
+  const handleClearAll = async () => {
     if (
-      window.confirm(
+      !window.confirm(
         'Are you sure you want to clear all applicant records?'
       )
     ) {
-      playCyberClick();
+      return;
+    }
 
-      const reset = clearAllStoredMembers();
+    playCyberClick();
 
-      setMembers(reset);
+    try {
+      const token = getAdminToken();
+
+      if (!token) {
+        throw new Error('Admin authentication token not found');
+      }
+
+      await Promise.all(
+        members.map((member) =>
+          fetch(
+            `${API_BASE_URL}/api/applications/${member.id}`,
+            {
+              method: 'DELETE',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          )
+        )
+      );
+
+      setMembers([]);
       setSelectedMember(null);
+    } catch (error) {
+      console.error(
+        'Failed to clear applications:',
+        error
+      );
+
+      await fetchMembers();
     }
   };
 
@@ -165,7 +260,9 @@ export const MembersTab: React.FC = () => {
       `"${m.year}"`,
       `"${m.domain}"`,
       `"${m.status}"`,
-      `"${new Date(m.submittedAt).toLocaleString()}"`,
+      `"${new Date(
+        m.submittedAt
+      ).toLocaleString()}"`,
       `"${(m.message || '')
         .replace(/"/g, '""')
         .replace(/\n/g, ' ')}"`,
@@ -175,12 +272,11 @@ export const MembersTab: React.FC = () => {
 
     const csvContent =
       'data:text/csv;charset=utf-8,' +
-      [headers.join(','), ...rows.map((row) => row.join(','))].join(
+      [headers.join(','), ...rows.map((e) => e.join(','))].join(
         '\n'
       );
 
     const encodedUri = encodeURI(csvContent);
-
     const link = document.createElement('a');
 
     link.setAttribute('href', encodedUri);
@@ -196,48 +292,51 @@ export const MembersTab: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  const filteredMembers = members.filter((member) => {
+  const filteredMembers = members.filter((m) => {
     const q = search.toLowerCase();
 
     const matchesSearch =
-      member.name.toLowerCase().includes(q) ||
-      member.email.toLowerCase().includes(q) ||
-      (member.usn &&
-        member.usn.toLowerCase().includes(q)) ||
-      (member.applicantId &&
-        member.applicantId.toLowerCase().includes(q)) ||
-      member.domain.toLowerCase().includes(q);
+      m.name.toLowerCase().includes(q) ||
+      m.email.toLowerCase().includes(q) ||
+      (m.usn &&
+        m.usn.toLowerCase().includes(q)) ||
+      (m.applicantId &&
+        m.applicantId.toLowerCase().includes(q)) ||
+      m.domain.toLowerCase().includes(q);
 
     const matchesYear =
       yearFilter === 'all' ||
-      member.year
+      m.year
         .toLowerCase()
         .includes(yearFilter.toLowerCase());
 
     const matchesStatus =
       statusFilter === 'all' ||
-      member.status === statusFilter;
+      m.status === statusFilter;
 
-    return matchesSearch && matchesYear && matchesStatus;
+    return (
+      matchesSearch &&
+      matchesYear &&
+      matchesStatus
+    );
   });
 
   const totalCount = members.length;
 
   const approvedCount = members.filter(
-    (member) => member.status === 'approved'
+    (m) => m.status === 'approved'
   ).length;
 
   const pendingCount = members.filter(
-    (member) => member.status === 'pending'
+    (m) => m.status === 'pending'
   ).length;
 
   const contactedCount = members.filter(
-    (member) => member.status === 'contacted'
+    (m) => m.status === 'contacted'
   ).length;
 
   return (
     <div className="space-y-5 font-mono">
-      {/* Top Banner Header Card */}
       <div className="rounded-xl border border-emerald-900/90 bg-[#061109]/90 p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-3.5">
           <div className="w-10 h-10 rounded-lg bg-[#041d0e] border border-emerald-500/80 flex items-center justify-center text-emerald-400">
@@ -251,7 +350,8 @@ export const MembersTab: React.FC = () => {
 
             <p className="text-xs text-emerald-500/90 font-sans mt-0.5">
               All student registrations submitted through the
-              &quot;Join CIPHER&quot; portal and verified club members.
+              &quot;Join CIPHER&quot; portal and verified club
+              members.
             </p>
           </div>
         </div>
@@ -292,7 +392,6 @@ export const MembersTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Metric Cards Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <div className="p-4 rounded-xl bg-[#061109] border border-emerald-950/90 shadow-sm">
           <div className="text-[11px] text-emerald-400/80 font-bold uppercase tracking-wider">
@@ -337,7 +436,6 @@ export const MembersTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Filter Row */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
         <div className="md:col-span-6 relative">
           <Search className="w-4 h-4 text-emerald-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -354,10 +452,14 @@ export const MembersTab: React.FC = () => {
         <div className="md:col-span-3">
           <select
             value={yearFilter}
-            onChange={(e) => setYearFilter(e.target.value)}
+            onChange={(e) =>
+              setYearFilter(e.target.value)
+            }
             className="w-full px-3 py-2 rounded-lg bg-[#040c07] border border-emerald-900/80 text-xs text-emerald-200 focus:border-emerald-400 font-sans cursor-pointer"
           >
-            <option value="all">All Academic Years</option>
+            <option value="all">
+              All Academic Years
+            </option>
             <option value="1st Year">1st Year</option>
             <option value="2nd Year">2nd Year</option>
             <option value="3rd Year">3rd Year</option>
@@ -389,25 +491,39 @@ export const MembersTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Table */}
       <div className="rounded-xl border border-emerald-950/90 bg-[#050e08] overflow-hidden shadow-md">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-emerald-900/60 bg-[#06140b] text-emerald-400/90 font-mono uppercase tracking-wider text-[11px]">
-                <th className="py-3 px-4">APPLICANT ID</th>
-                <th className="py-3 px-4">STUDENT DETAILS</th>
-                <th className="py-3 px-4">YEAR &amp; DOMAIN</th>
-                <th className="py-3 px-4">STATUS</th>
-                <th className="py-3 px-4">CONTACT</th>
-                <th className="py-3 px-4 text-right">ACTIONS</th>
+                <th className="py-3 px-4">
+                  APPLICANT ID
+                </th>
+                <th className="py-3 px-4">
+                  STUDENT DETAILS
+                </th>
+                <th className="py-3 px-4">
+                  YEAR &amp; DOMAIN
+                </th>
+                <th className="py-3 px-4">
+                  STATUS
+                </th>
+                <th className="py-3 px-4">
+                  CONTACT
+                </th>
+                <th className="py-3 px-4 text-right">
+                  ACTIONS
+                </th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-emerald-950/60">
               {members.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-14 text-center">
+                  <td
+                    colSpan={6}
+                    className="py-14 text-center"
+                  >
                     <div className="flex flex-col items-center justify-center space-y-2 text-emerald-600 font-mono">
                       <Users className="w-8 h-8 text-emerald-800/80 mb-1" />
 
@@ -416,9 +532,10 @@ export const MembersTab: React.FC = () => {
                       </div>
 
                       <p className="text-xs text-emerald-600 font-sans max-w-sm">
-                        No member applications have been pre-seeded. Live
-                        student submissions from the &quot;Join CIPHER&quot;
-                        portal will automatically populate here.
+                        No member applications have been
+                        pre-seeded. Live student submissions
+                        from the &quot;Join CIPHER&quot; portal
+                        will automatically populate here.
                       </p>
                     </div>
                   </td>
@@ -429,7 +546,8 @@ export const MembersTab: React.FC = () => {
                     colSpan={6}
                     className="py-12 text-center text-emerald-600 font-mono"
                   >
-                    NO APPLICANT RECORDS MATCH CURRENT SEARCH OR FILTERS
+                    NO APPLICANT RECORDS MATCH CURRENT SEARCH
+                    OR FILTERS
                   </td>
                 </tr>
               ) : (
@@ -439,7 +557,8 @@ export const MembersTab: React.FC = () => {
                     className="hover:bg-emerald-950/20 transition-colors"
                   >
                     <td className="py-3.5 px-4 font-mono font-bold text-emerald-400">
-                      {member.applicantId || member.id}
+                      {member.applicantId ||
+                        member.id}
                     </td>
 
                     <td className="py-3.5 px-4">
@@ -519,7 +638,6 @@ export const MembersTab: React.FC = () => {
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-sans truncate max-w-[200px]">
                         <Mail className="w-3 h-3 text-emerald-500 shrink-0" />
-
                         <span className="truncate">
                           {member.email}
                         </span>
@@ -548,7 +666,10 @@ export const MembersTab: React.FC = () => {
 
                         <button
                           onClick={() =>
-                            handleDelete(member.id, member.name)
+                            handleDelete(
+                              member.id,
+                              member.name
+                            )
                           }
                           className="p-1.5 text-rose-500/80 hover:text-rose-300 rounded hover:bg-rose-950/40 transition-colors cursor-pointer"
                           title="Delete Member"
@@ -565,7 +686,6 @@ export const MembersTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Member Dossier Detail Modal */}
       {selectedMember && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="w-full max-w-xl bg-[#061209] border border-emerald-500 rounded-2xl p-6 shadow-[0_0_40px_rgba(16,185,129,0.3)]">
@@ -573,7 +693,8 @@ export const MembersTab: React.FC = () => {
               <div>
                 <div className="text-[10px] text-emerald-400 uppercase font-mono tracking-widest">
                   APPLICANT DOSSIER //{' '}
-                  {selectedMember.applicantId || selectedMember.id}
+                  {selectedMember.applicantId ||
+                    selectedMember.id}
                 </div>
 
                 <h3 className="text-xl font-bold text-white mt-1">
@@ -582,12 +703,15 @@ export const MembersTab: React.FC = () => {
 
                 <div className="text-xs text-emerald-400 font-mono mt-0.5">
                   USN: {selectedMember.usn || 'N/A'} •{' '}
-                  {selectedMember.year} • {selectedMember.domain}
+                  {selectedMember.year} •{' '}
+                  {selectedMember.domain}
                 </div>
               </div>
 
               <button
-                onClick={() => setSelectedMember(null)}
+                onClick={() =>
+                  setSelectedMember(null)
+                }
                 className="p-1 text-emerald-500 hover:text-white rounded"
               >
                 <X className="w-5 h-5" />
@@ -636,7 +760,7 @@ export const MembersTab: React.FC = () => {
                     rel="noreferrer"
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-300 hover:text-white"
                   >
-                    <GithubLogo className="w-3.5 h-3.5" />
+                    <Github className="w-3.5 h-3.5" />
                     <span>GitHub Profile</span>
                   </a>
                 )}
@@ -648,7 +772,7 @@ export const MembersTab: React.FC = () => {
                     rel="noreferrer"
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/60 border border-emerald-800 text-emerald-300 hover:text-white"
                   >
-                    <LinkedinLogo className="w-3.5 h-3.5" />
+                    <Linkedin className="w-3.5 h-3.5" />
                     <span>LinkedIn Profile</span>
                   </a>
                 )}
@@ -683,7 +807,9 @@ export const MembersTab: React.FC = () => {
               </div>
 
               <button
-                onClick={() => setSelectedMember(null)}
+                onClick={() =>
+                  setSelectedMember(null)
+                }
                 className="px-3 py-1.5 rounded-lg border border-emerald-800 text-emerald-400 hover:text-white text-xs cursor-pointer"
               >
                 Close
