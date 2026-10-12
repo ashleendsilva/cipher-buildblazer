@@ -9,7 +9,6 @@
     "build": "tsc",
     "migrate:deploy": "prisma migrate deploy",
     "start": "node dist/server.js",
-    "postinstall": "prisma skills sync || exit 0"
   },
   "keywords": [],
   "author": "",
